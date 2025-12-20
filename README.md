@@ -1,337 +1,134 @@
-# Gerrit CLI
+# Gerrit Agent: AI-Powered Gerrit Assistant
 
-A command-line tool for Gerrit Code Review, inspired by GitHub CLI, allowing you to perform code reviews efficiently from the terminal.
+**gerrit-agent** (formerly `gerrit-cli`) is a next-generation command-line interface and AI Agent for Gerrit Code Review. It goes beyond simple API wrappers by integrating with LLMs to act as your intelligent copilot for code reviews.
 
-## Features
+> **Note:** This project has been renamed from `gerrit-cli` to `gerrit-agent` to better reflect its AI capabilities.
 
-- 🔍 View and search Changes
-- 💬 Add comments and reviews
-- ⭐ Score Code-Review and Verified labels
-- 📊 Beautiful table output (using rich library)
-- 📄 Support for JSON output format
-- ⚙️ Simple environment variable configuration
+## 🚀 Key Features
 
-## Installation
+*   **🤖 AI-Powered Review Agent**: Integrates with Gemini CLI to automatically analyze changes and post inline comments.
+*   **💻 Modern CLI**: A human-friendly terminal interface for Gerrit (List, Show, Checkout, Review).
+*   **🔌 Extensible**: Designed to work as a Gemini CLI Extension and (soon) a Claude Code / MCP server.
+*   **🛠️ Developer Friendly**: Built with `click`, `rich`, and `httpx`.
 
-### Using uv (Recommended)
+---
 
-```bash
-# Clone the repository
-git clone <repository-url>
-cd gerrit-cli
+## 🛠️ Installation & Configuration
 
-# Install dependencies
-uv sync
+All modes (CLI, Gemini Agent, MCP) require the base python package and configuration.
 
-# Run using uv run
-uv run gerrit --help
-```
-
-### Using pip
+### 1. Install
 
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd gerrit-cli
-
-# Install
-pip install -e .
-
-# Run directly
-gerrit --help
+pip install gerrit-agent
 ```
 
-## Configuration
+### 2. Configure Environment
 
-Gerrit CLI uses environment variables for configuration. You can configure it in two ways:
-
-### Option 1: Environment Variables
-
-```bash
-export GERRIT_URL=https://gerrit.example.com
-export GERRIT_USERNAME=your_username
-export GERRIT_PASSWORD=your_password
-```
-
-### Option 2: .env File (Recommended)
-
-Copy `.env.example` to `.env` and modify the configuration:
-
-```bash
-cp .env.example .env
-```
-
-Edit the `.env` file:
+Create a `.env` file in your working directory or export these variables:
 
 ```bash
 # Gerrit Server Configuration
-GERRIT_URL=https://gerrit.example.com
-GERRIT_USERNAME=your_username
-GERRIT_PASSWORD=your_password
-
-# Or use HTTP Token (Generated in Gerrit Settings -> HTTP Credentials)
-# GERRIT_TOKEN=your_http_token
+export GERRIT_URL=https://gerrit.example.com
+export GERRIT_USERNAME=your_username
+export GERRIT_PASSWORD=your_password 
+# Or use HTTP Token (Recommended)
+# export GERRIT_TOKEN=your_http_token
 ```
 
-## Usage
+---
 
-### View Help
+## 🤖 Mode 1: Gemini CLI Extension (Recommended)
+
+**Turn your terminal into a Principal Software Engineer.** 
+
+By linking `gerrit-agent` with the Gemini CLI, you can use natural language to interact with Gerrit and perform automated code reviews.
+
+### Setup
+
+Assuming you have the Gemini CLI installed, link this extension:
 
 ```bash
-gerrit --help
-gerrit change --help
-gerrit review --help
+# If you cloned the repo locally
+gemini extensions link ./gemini-cli-extensions
+
+# Or via URL (once published)
+# gemini extensions link https://github.com/madroid/gerrit-agent/gemini-cli-extensions
 ```
 
-### List Changes
+### Usage
 
-> **Shortcut**: `gerrit list` is an alias for `gerrit change list`.
+**Automated Code Review:**
+Ask the agent to review a specific change ID. It will fetch the diff, analyze it, and post inline comments directly to Gerrit.
 
 ```bash
-# List all open changes
-gerrit list
-
-# List your own changes
-gerrit list --owner me
-
-# Filter by project
-gerrit list --project myproject
-
-# Custom query
-gerrit list -q "status:merged branch:main"
-
-# Limit results
-gerrit list -n 50
-
-# JSON format output
-gerrit list --format json
+gemini "Review change 12345"
+# or use the command alias
+gemini /code-review 12345
 ```
 
-### View Change Details
-
-> **Shortcut**: `gerrit show` is an alias for `gerrit change view`.
-
+**Summarize Changes:**
 ```bash
-# View change details (using numeric ID)
-gerrit show 12345
-
-# View change details (using Change-Id)
-gerrit show I1234567890abcdef
-
-# Show comments
-gerrit show 12345 --comments
-
-# JSON format output
-gerrit show 12345 --format json
+gemini "Summarize what change 12345 does"
 ```
 
-### Checkout Change to Local
+---
 
-> **Shortcut**: `gerrit checkout` is an alias for `gerrit change checkout`.
+## 💻 Mode 2: Standalone CLI
+
+For precise control, use the `gerrit` command directly. It mimics the GitHub CLI (`gh`) experience.
+
+> 📖 **Full Documentation**: For a complete list of commands, flags, and advanced usage (including checkout options and query syntax), please see the [**CLI Reference Guide**](docs/CLI_REFERENCE.md).
+
+### Common Commands
+
+| Action | Command | Alias |
+|--------|---------|-------|
+| **List** | `gerrit list` | `gerrit change list` |
+| **Show** | `gerrit show <id>` | `gerrit change view` |
+| **Checkout** | `gerrit checkout <id>` | `gerrit change checkout` |
+| **Review** | `gerrit review <id>` | |
+
+### Quick Examples
 
 ```bash
-# Checkout change to a new local branch for testing or review
+# List open changes assigned to you
+gerrit list --owner me --status open
+
+# Checkout a change to a local branch
 gerrit checkout 12345
 
-# Specify custom branch name
-gerrit checkout 12345 -b my-review-branch
-
-# Force delete and recreate if branch exists
-gerrit checkout 12345 --force
-
-# Fetch only, do not checkout (stay on current branch)
-gerrit checkout 12345 --no-checkout
-
-# Auto stash uncommitted changes
-gerrit checkout 12345 --stash
-
-# Do not stash, force continue (changes may be lost)
-gerrit checkout 12345 --no-stash
+# Submit a +2 Code-Review
+gerrit review 12345 --code-review +2 -m "LGTM!"
 ```
 
-**Handling Uncommitted Changes:**
+---
 
-The checkout command checks your working directory status. If there are uncommitted changes, it will offer the following options:
+## 🧠 Mode 3: Claude Code Agent (Coming Soon)
 
-1. **Stash changes (Recommended)**: Automatically runs `git stash`. You can use `git stash pop` to restore them after checkout.
-2. **Cancel operation**: Allows you to manually handle current changes first.
-3. **Force continue**: Switch branches directly (uncommitted changes may be lost).
+We are actively working on an **MCP (Model Context Protocol)** server implementation. This will allow `gerrit-agent` to serve as a tool for Claude Code and other MCP-compatible assistants.
 
-You can also use `--stash` or `--no-stash` options to skip the prompt.
+*   **Capabilities:** Claude will be able to search Gerrit, read file content, and understand the context of large relation chains.
+*   **Status:** 🚧 In Development
 
-**Repository Verification:**
+---
 
-The checkout command intelligently checks if the current repository matches the Change:
-
-1. **Not in a Git repository**: Prompts you to cd into a Git repository directory.
-2. **No origin remote**: Warns and asks if you want to continue.
-3. **Repository mismatch**: Warns if the remote URL doesn't seem to match the Change's project, preventing you from fetching into the wrong repository.
-
-These checks ensure you don't perform fetch operations in the wrong directory or repository.
-
-### Add Comments
-
-```bash
-# Add information comment
-gerrit change comment 12345 -m "LGTM"
-
-# Read comment from file
-gerrit change comment 12345 -f comment.txt
-```
-
-### Submit Review
-
-```bash
-# Code-Review +2
-gerrit review 12345 --code-review +2 -m "Looks good to me!"
-
-# Code-Review -1 with message
-gerrit review 12345 --code-review -1 -m "Please fix the following issues..."
-
-# Code-Review +2 and Verified +1
-gerrit review 12345 --code-review +2 --verified +1 -m "LGTM and verified"
-
-# Read review message from file
-gerrit review 12345 --code-review +2 -f review.txt
-```
-
-## Command Reference
-
-Gerrit CLI provides comprehensive built-in help documentation. To view detailed instructions for all available commands and options, simply run:
-
-```bash
-# View all commands
-gerrit --help
-
-# View parameters for a specific command (e.g., list)
-gerrit change list --help
-```
-
-## Gerrit API Query Syntax
-
-The `-q/--query` option supports Gerrit's query syntax. Common query conditions:
-
-- `status:open` - Open changes
-- `status:merged` - Merged changes
-- `status:abandoned` - Abandoned changes
-- `owner:username` - Filter by owner
-- `owner:me` - Changes owned by current user
-- `project:projectname` - Filter by project
-- `branch:branchname` - Filter by branch
-- `is:watched` - Changes being watched
-- `is:reviewer` - Changes where you are a reviewer
-
-You can combine multiple conditions:
-
-```bash
-gerrit change list -q "status:open project:myproject branch:main"
-```
-
-## Development
-
-### Install Development Dependencies
-
-```bash
-uv sync --extra dev
-```
-
-### Run Tests
-
-```bash
-uv run pytest
-```
-
-### Code Formatting
-
-```bash
-uv run black src/ tests/
-uv run ruff check src/ tests/
-```
-
-### Type Checking
-
-```bash
-uv run mypy src/
-```
-
-## Project Structure
+## 📦 Project Structure
 
 ```
-gerrit-cli/
-├── src/gerrit_cli/
-│   ├── __init__.py
-│   ├── __main__.py
-│   ├── cli.py              # CLI Entry Point
-│   ├── config.py           # Configuration Management
-│   ├── client/
-│   │   ├── api.py          # Gerrit API Client
-│   │   ├── auth.py         # Authentication Handling
-│   │   └── models.py       # Data Models
-│   ├── commands/
-│   │   ├── change.py       # 'change' Command Group
-│   │   └── review.py       # 'review' Command
-│   ├── formatters/
-│   │   ├── base.py         # Formatter Base Class
-│   │   ├── table.py        # Table Formatter
-│   │   └── json.py         # JSON Formatter
-│   └── utils/
-│       ├── exceptions.py   # Custom Exceptions
-│       └── helpers.py      # Helper Functions
-└── tests/                  # Test Files
+gerrit-agent/
+├── gemini-cli-extensions/  # Configuration for Gemini CLI
+├── src/gerrit_cli/         # Core Python Logic
+│   ├── client/             # Gerrit REST API Client
+│   ├── commands/           # Click CLI Commands
+│   └── ...
+└── tests/                  # Pytest Suite
 ```
 
-## Tech Stack
+## 🤝 Contributing
 
-- **CLI Framework**: [Click](https://click.palletsprojects.com/)
-- **HTTP Client**: [httpx](https://www.python-httpx.org/)
-- **Data Validation**: [Pydantic](https://docs.pydantic.dev/)
-- **Output Formatting**: [Rich](https://rich.readthedocs.io/)
-- **Configuration**: [python-dotenv](https://github.com/theskumar/python-dotenv)
-- **Project Management**: [uv](https://docs.astral.sh/uv/)
-
-## Planned Features
-
-- [ ] Draft comments
-- [ ] Submit change
-- [ ] Inline comments (for specific code lines)
-- [ ] File-level diff viewing
-- [ ] Reviewer management
-- [ ] Batch operations
-- [ ] Configuration file support (~/.gerrit-cli.yaml)
-- [ ] Command auto-completion
-- [ ] Fetch Relation Chain (dependency chain)
-- [ ] Fetch specific Patch Set
-
-## FAQ
-
-### Authentication Failed
-
-Ensure your username and password are correct. Using Gerrit HTTP Token is recommended instead of account password.
-
-Generate HTTP Token:
-1. Log in to Gerrit
-2. Go to Settings -> HTTP Credentials
-3. Click "GENERATE NEW PASSWORD"
-4. Set the generated token as `GERRIT_TOKEN` environment variable
-
-### Network Timeout
-
-If your Gerrit server is slow, you might encounter timeout issues. Current timeout is set to 30 seconds. To adjust, modify the `timeout` parameter in `src/gerrit_cli/client/api.py`.
-
-### Query Syntax Error
-
-Ensure your query conditions comply with Gerrit query syntax. Refer to [Gerrit Official Documentation](https://gerrit-review.googlesource.com/Documentation/user-search.html).
-
-## References
-
-- [Gerrit REST API Documentation](https://gerrit-review.googlesource.com/Documentation/rest-api.html)
-- [Gerrit Changes API](https://gerrit-review.googlesource.com/Documentation/rest-api-changes.html)
-- [GitHub CLI](https://cli.github.com/) - Design inspiration
+Contributions are welcome! Please check the [issues](https://github.com/madroid/gerrit-agent/issues) for planned features like Draft Comments and Batch Operations.
 
 ## License
 
 MIT License
-
-## Contributing
-
-Issues and Pull Requests are welcome!
