@@ -1,0 +1,6 @@
+{
+  "name": "gerrit-review",
+  "version": "0.1.0",
+  "description": "AI-powered code review for Gerrit changes",
+  "contextFileName": "README.md"
+}
