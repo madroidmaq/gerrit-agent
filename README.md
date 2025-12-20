@@ -85,69 +85,75 @@ gerrit review --help
 
 ### List Changes
 
+> **Shortcut**: `gerrit list` is an alias for `gerrit change list`.
+
 ```bash
 # List all open changes
-gerrit change list
+gerrit list
 
 # List your own changes
-gerrit change list --owner me
+gerrit list --owner me
 
 # Filter by project
-gerrit change list --project myproject
+gerrit list --project myproject
 
 # Custom query
-gerrit change list -q "status:merged branch:main"
+gerrit list -q "status:merged branch:main"
 
 # Limit results
-gerrit change list -n 50
+gerrit list -n 50
 
 # JSON format output
-gerrit change list --format json
+gerrit list --format json
 ```
 
 ### View Change Details
 
+> **Shortcut**: `gerrit show` is an alias for `gerrit change view`.
+
 ```bash
 # View change details (using numeric ID)
-gerrit change view 12345
+gerrit show 12345
 
 # View change details (using Change-Id)
-gerrit change view I1234567890abcdef
+gerrit show I1234567890abcdef
 
 # Show comments
-gerrit change view 12345 --comments
+gerrit show 12345 --comments
 
 # JSON format output
-gerrit change view 12345 --format json
+gerrit show 12345 --format json
 ```
 
-### Fetch Change to Local
+### Checkout Change to Local
+
+> **Shortcut**: `gerrit checkout` is an alias for `gerrit change checkout`.
 
 ```bash
-# Fetch change to a new local branch for testing or review
-gerrit change fetch 12345
+# Checkout change to a new local branch for testing or review
+gerrit checkout 12345
 
 # Specify custom branch name
-gerrit change fetch 12345 -b my-review-branch
+gerrit checkout 12345 -b my-review-branch
 
 # Force delete and recreate if branch exists
-gerrit change fetch 12345 --force
+gerrit checkout 12345 --force
 
 # Fetch only, do not checkout (stay on current branch)
-gerrit change fetch 12345 --no-checkout
+gerrit checkout 12345 --no-checkout
 
 # Auto stash uncommitted changes
-gerrit change fetch 12345 --stash
+gerrit checkout 12345 --stash
 
 # Do not stash, force continue (changes may be lost)
-gerrit change fetch 12345 --no-stash
+gerrit checkout 12345 --no-stash
 ```
 
 **Handling Uncommitted Changes:**
 
-The fetch command checks your working directory status. If there are uncommitted changes, it will offer the following options:
+The checkout command checks your working directory status. If there are uncommitted changes, it will offer the following options:
 
-1. **Stash changes (Recommended)**: Automatically runs `git stash`. You can use `git stash pop` to restore them after fetching.
+1. **Stash changes (Recommended)**: Automatically runs `git stash`. You can use `git stash pop` to restore them after checkout.
 2. **Cancel operation**: Allows you to manually handle current changes first.
 3. **Force continue**: Switch branches directly (uncommitted changes may be lost).
 
@@ -155,7 +161,7 @@ You can also use `--stash` or `--no-stash` options to skip the prompt.
 
 **Repository Verification:**
 
-The fetch command intelligently checks if the current repository matches the Change:
+The checkout command intelligently checks if the current repository matches the Change:
 
 1. **Not in a Git repository**: Prompts you to cd into a Git repository directory.
 2. **No origin remote**: Warns and asks if you want to continue.

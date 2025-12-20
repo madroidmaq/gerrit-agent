@@ -42,6 +42,14 @@ from gerrit_cli.commands.review import review
 main.add_command(change)
 main.add_command(review)
 
+# Root-level Alias (Scheme B)
+main.add_command(change.commands["list"], name="list")
+main.add_command(change.commands["view"], name="show")
+main.add_command(change.commands["checkout"], name="checkout")
+
+# Group Alias (Scheme A)
+main.add_command(change, name="c")
+
 
 if __name__ == "__main__":
     main()

@@ -53,10 +53,10 @@ def list(
     """List changes
 
     Examples:
-        gerrit change list
-        gerrit change list -q "status:merged"
-        gerrit change list --owner me
-        gerrit change list --project myproject --format json
+        gerrit list
+        gerrit list -q "status:merged"
+        gerrit list --owner me
+        gerrit list --project myproject --format json
     """
     config = ctx.obj["config"]
 
@@ -117,10 +117,10 @@ def view(
     CHANGE_ID can be a numeric ID, Change-Id, or full path
 
     Examples:
-        gerrit change view 12345
-        gerrit change view I1234567890abcdef
-        gerrit change view 12345 --comments
-        gerrit change view 12345 --format json
+        gerrit show 12345
+        gerrit show I1234567890abcdef
+        gerrit show 12345 --comments
+        gerrit show 12345 --format json
     """
     config = ctx.obj["config"]
 
@@ -205,7 +205,7 @@ def comment(
     help="Auto stash uncommitted changes (will prompt by default)",
 )
 @click.pass_context
-def fetch(
+def checkout(
     ctx: click.Context,
     change_id: str,
     branch: str | None,
@@ -213,7 +213,7 @@ def fetch(
     no_checkout: bool,
     stash: bool | None,
 ) -> None:
-    """Fetch change to local branch
+    """Checkout change to local branch
 
     This command fetches a specified change from Gerrit to local, and creates a new branch.
     If the working directory has uncommitted changes, it will prompt you how to handle them.
@@ -221,20 +221,20 @@ def fetch(
     CHANGE_ID can be a numeric ID, Change-Id, or full path
 
     Examples:
-        # Fetch change 12345 to new branch
-        gerrit change fetch 12345
+        # Checkout change 12345 to new branch
+        gerrit checkout 12345
 
         # Specify branch name
-        gerrit change fetch 12345 -b my-review-branch
+        gerrit checkout 12345 -b my-review-branch
 
         # Force recreate branch if exists
-        gerrit change fetch 12345 --force
+        gerrit checkout 12345 --force
 
         # Only fetch without checkout
-        gerrit change fetch 12345 --no-checkout
+        gerrit checkout 12345 --no-checkout
 
         # Auto stash uncommitted changes
-        gerrit change fetch 12345 --stash
+        gerrit checkout 12345 --stash
     """
     config = ctx.obj["config"]
 
@@ -247,7 +247,7 @@ def fetch(
             click.echo()
             click.echo("Example:")
             click.echo("  cd /path/to/your/gerrit/project")
-            click.echo("  gerrit change fetch 12345")
+            click.echo("  gerrit checkout 12345")
             sys.exit(1)
 
         # 2. Get change info from Gerrit
@@ -295,7 +295,7 @@ def fetch(
                         click.echo("Suggestion:")
                         click.echo(f"  1. Find the Git repo directory for {change.project}")
                         click.echo("  2. cd into that directory")
-                        click.echo(f"  3. Run again: gerrit change fetch {change_id}")
+                        click.echo(f"  3. Run again: gerrit checkout {change_id}")
                         sys.exit(0)
 
         # 4. Verify change info
