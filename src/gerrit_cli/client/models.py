@@ -1,4 +1,4 @@
-"""Gerrit API 数据模型"""
+"""Gerrit API Data Models"""
 
 from typing import Any
 
@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class Account(BaseModel):
-    """Gerrit 账户信息"""
+    """Gerrit Account Info"""
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -17,7 +17,7 @@ class Account(BaseModel):
 
 
 class Change(BaseModel):
-    """Change 基本信息"""
+    """Change Basic Info"""
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -37,12 +37,12 @@ class Change(BaseModel):
 
     @property
     def display_id(self) -> str:
-        """返回显示用的 ID（数字 ID）"""
+        """Return display ID (number ID)"""
         return str(self.number)
 
 
 class LabelInfo(BaseModel):
-    """标签信息"""
+    """Label Info"""
 
     approved: Account | None = None
     rejected: Account | None = None
@@ -55,7 +55,7 @@ class LabelInfo(BaseModel):
 
 
 class MessageInfo(BaseModel):
-    """消息信息"""
+    """Message Info"""
 
     id: str
     author: Account | None = None
@@ -65,7 +65,7 @@ class MessageInfo(BaseModel):
 
 
 class FileInfo(BaseModel):
-    """文件信息"""
+    """File Info"""
 
     status: str | None = None
     binary: bool | None = None
@@ -77,7 +77,7 @@ class FileInfo(BaseModel):
 
 
 class ChangeDetail(Change):
-    """Change 详细信息"""
+    """Change Detail"""
 
     messages: list[MessageInfo] | None = None
     labels: dict[str, LabelInfo] | None = None
@@ -87,7 +87,7 @@ class ChangeDetail(Change):
 
 
 class CommentInfo(BaseModel):
-    """评论信息"""
+    """Comment Info"""
 
     id: str | None = None
     patch_set: int | None = None
@@ -103,7 +103,7 @@ class CommentInfo(BaseModel):
 
 
 class CommentInput(BaseModel):
-    """评论输入"""
+    """Comment Input"""
 
     path: str | None = None
     line: int | None = None
@@ -114,7 +114,7 @@ class CommentInput(BaseModel):
 
 
 class ReviewInput(BaseModel):
-    """Review 请求输入"""
+    """Review Request Input"""
 
     message: str | None = None
     labels: dict[str, int] | None = None
@@ -127,7 +127,7 @@ class ReviewInput(BaseModel):
 
 
 class ReviewResult(BaseModel):
-    """Review 响应结果"""
+    """Review Response Result"""
 
     labels: dict[str, int] | None = None
     reviewers: dict[str, Any] | None = None

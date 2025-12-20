@@ -1,4 +1,4 @@
-"""允许使用 python -m gerrit_cli 运行"""
+"""Allow running with python -m gerrit_cli"""
 
 from gerrit_cli.cli import main
 

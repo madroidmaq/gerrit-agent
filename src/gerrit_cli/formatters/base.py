@@ -1,4 +1,4 @@
-"""格式化器基类"""
+"""Formatter Base Class"""
 
 from abc import ABC, abstractmethod
 
@@ -6,29 +6,29 @@ from gerrit_cli.client.models import Change, ChangeDetail
 
 
 class Formatter(ABC):
-    """格式化器抽象基类"""
+    """Abstract base class for formatters"""
 
     @abstractmethod
     def format_changes(self, changes: list[Change]) -> str:
-        """格式化 changes 列表
+        """Format changes list
 
         Args:
-            changes: Change 对象列表
+            changes: List of Change objects
 
         Returns:
-            格式化后的字符串
+            Formatted string
         """
         pass
 
     @abstractmethod
     def format_change_detail(self, change: ChangeDetail, show_comments: bool = False) -> str:
-        """格式化 change 详情
+        """Format change details
 
         Args:
-            change: ChangeDetail 对象
-            show_comments: 是否显示评论
+            change: ChangeDetail object
+            show_comments: Whether to show comments
 
         Returns:
-            格式化后的字符串
+            Formatted string
         """
         pass

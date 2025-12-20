@@ -1,4 +1,4 @@
-"""Gerrit API 客户端模块"""
+"""Gerrit API Client Module"""
 
 from gerrit_cli.client.models import (
     Account,

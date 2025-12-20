@@ -1,20 +1,20 @@
-"""自定义异常类"""
+"""Custom exceptions"""
 
 
 class GerritCliError(Exception):
-    """CLI 基础异常"""
+    """Base CLI exception"""
 
     pass
 
 
 class ConfigError(GerritCliError):
-    """配置错误"""
+    """Configuration error"""
 
     pass
 
 
 class ApiError(GerritCliError):
-    """API 请求错误"""
+    """API request error"""
 
     def __init__(self, message: str, status_code: int | None = None) -> None:
         self.status_code = status_code
@@ -22,12 +22,12 @@ class ApiError(GerritCliError):
 
 
 class AuthenticationError(ApiError):
-    """认证错误"""
+    """Authentication error"""
 
     pass
 
 
 class NotFoundError(ApiError):
-    """资源不存在"""
+    """Resource not found"""
 
     pass

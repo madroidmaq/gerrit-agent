@@ -1,51 +1,51 @@
-查看当前项目中内容，根据 readme 中的内容新建# Gerrit CLI
+# Gerrit CLI
 
-Gerrit Code Review 的命令行工具，参考 GitHub CLI 的设计理念，让你可以通过命令行高效地进行代码审查。
+A command-line tool for Gerrit Code Review, inspired by GitHub CLI, allowing you to perform code reviews efficiently from the terminal.
 
-## 特性
+## Features
 
-- 🔍 查看和搜索 Changes
-- 💬 添加评论和 Review
-- ⭐ Code-Review 和 Verified 打分
-- 📊 美观的表格输出（使用 rich 库）
-- 📄 支持 JSON 格式输出
-- ⚙️ 简单的环境变量配置
+- 🔍 View and search Changes
+- 💬 Add comments and reviews
+- ⭐ Score Code-Review and Verified labels
+- 📊 Beautiful table output (using rich library)
+- 📄 Support for JSON output format
+- ⚙️ Simple environment variable configuration
 
-## 安装
+## Installation
 
-### 使用 uv（推荐）
+### Using uv (Recommended)
 
 ```bash
-# Clone 项目
+# Clone the repository
 git clone <repository-url>
 cd gerrit-cli
 
-# 安装依赖
+# Install dependencies
 uv sync
 
-# 使用 uv run 运行
+# Run using uv run
 uv run gerrit --help
 ```
 
-### 使用 pip
+### Using pip
 
 ```bash
-# Clone 项目
+# Clone the repository
 git clone <repository-url>
 cd gerrit-cli
 
-# 安装
+# Install
 pip install -e .
 
-# 直接使用
+# Run directly
 gerrit --help
 ```
 
-## 配置
+## Configuration
 
-Gerrit CLI 使用环境变量进行配置。你可以通过以下两种方式配置：
+Gerrit CLI uses environment variables for configuration. You can configure it in two ways:
 
-### 方式 1：环境变量
+### Option 1: Environment Variables
 
 ```bash
 export GERRIT_URL=https://gerrit.example.com
@@ -53,29 +53,29 @@ export GERRIT_USERNAME=your_username
 export GERRIT_PASSWORD=your_password
 ```
 
-### 方式 2：.env 文件（推荐）
+### Option 2: .env File (Recommended)
 
-复制 `.env.example` 到 `.env` 并修改配置：
+Copy `.env.example` to `.env` and modify the configuration:
 
 ```bash
 cp .env.example .env
 ```
 
-编辑 `.env` 文件：
+Edit the `.env` file:
 
 ```bash
-# Gerrit 服务器配置
+# Gerrit Server Configuration
 GERRIT_URL=https://gerrit.example.com
 GERRIT_USERNAME=your_username
 GERRIT_PASSWORD=your_password
 
-# 或使用 HTTP Token（在 Gerrit Settings -> HTTP Credentials 生成）
+# Or use HTTP Token (Generated in Gerrit Settings -> HTTP Credentials)
 # GERRIT_TOKEN=your_http_token
 ```
 
-## 使用
+## Usage
 
-### 查看帮助
+### View Help
 
 ```bash
 gerrit --help
@@ -83,249 +83,249 @@ gerrit change --help
 gerrit review --help
 ```
 
-### 列出 Changes
+### List Changes
 
 ```bash
-# 列出所有 open 的 changes
+# List all open changes
 gerrit change list
 
-# 列出自己的 changes
+# List your own changes
 gerrit change list --owner me
 
-# 按项目筛选
+# Filter by project
 gerrit change list --project myproject
 
-# 自定义查询
+# Custom query
 gerrit change list -q "status:merged branch:main"
 
-# 限制结果数量
+# Limit results
 gerrit change list -n 50
 
-# JSON 格式输出
+# JSON format output
 gerrit change list --format json
 ```
 
-### 查看 Change 详情
+### View Change Details
 
 ```bash
-# 查看 change 详情（使用数字 ID）
+# View change details (using numeric ID)
 gerrit change view 12345
 
-# 查看 change 详情（使用 Change-Id）
+# View change details (using Change-Id)
 gerrit change view I1234567890abcdef
 
-# 显示评论
+# Show comments
 gerrit change view 12345 --comments
 
-# JSON 格式输出
+# JSON format output
 gerrit change view 12345 --format json
 ```
 
-### 拉取 Change 到本地
+### Fetch Change to Local
 
 ```bash
-# 拉取 change 到本地新分支进行测试或审查
+# Fetch change to a new local branch for testing or review
 gerrit change fetch 12345
 
-# 指定自定义分支名称
+# Specify custom branch name
 gerrit change fetch 12345 -b my-review-branch
 
-# 如果分支已存在，强制删除并重新创建
+# Force delete and recreate if branch exists
 gerrit change fetch 12345 --force
 
-# 只拉取不切换分支（保持在当前分支）
+# Fetch only, do not checkout (stay on current branch)
 gerrit change fetch 12345 --no-checkout
 
-# 自动 stash 未提交的修改
+# Auto stash uncommitted changes
 gerrit change fetch 12345 --stash
 
-# 不使用 stash，强制继续（可能丢失修改）
+# Do not stash, force continue (changes may be lost)
 gerrit change fetch 12345 --no-stash
 ```
 
-**处理未提交的修改：**
+**Handling Uncommitted Changes:**
 
-fetch 命令会检查工作区状态，如果有未提交的修改，会提供以下选项：
+The fetch command checks your working directory status. If there are uncommitted changes, it will offer the following options:
 
-1. **使用 stash 保存（推荐）**：自动执行 `git stash`，在拉取完成后可以使用 `git stash pop` 恢复
-2. **取消操作**：让你先手动处理当前修改
-3. **强制继续**：直接切换分支（可能丢失未提交的修改）
+1. **Stash changes (Recommended)**: Automatically runs `git stash`. You can use `git stash pop` to restore them after fetching.
+2. **Cancel operation**: Allows you to manually handle current changes first.
+3. **Force continue**: Switch branches directly (uncommitted changes may be lost).
 
-你也可以使用 `--stash` 或 `--no-stash` 选项跳过询问。
+You can also use `--stash` or `--no-stash` options to skip the prompt.
 
-**仓库验证：**
+**Repository Verification:**
 
-fetch 命令会智能检查当前仓库是否与 Change 匹配：
+The fetch command intelligently checks if the current repository matches the Change:
 
-1. **不在 Git 仓库中**：会提示你需要 cd 到 Git 仓库目录
-2. **没有 origin remote**：会警告并询问是否继续
-3. **仓库与 Change 项目不匹配**：会警告并提供建议，防止在错误的仓库中拉取代码
+1. **Not in a Git repository**: Prompts you to cd into a Git repository directory.
+2. **No origin remote**: Warns and asks if you want to continue.
+3. **Repository mismatch**: Warns if the remote URL doesn't seem to match the Change's project, preventing you from fetching into the wrong repository.
 
-这些检查确保你不会在错误的目录或仓库中执行 fetch 操作。
+These checks ensure you don't perform fetch operations in the wrong directory or repository.
 
-### 添加评论
+### Add Comments
 
 ```bash
-# 添加评论
+# Add information comment
 gerrit change comment 12345 -m "LGTM"
 
-# 从文件读取评论
+# Read comment from file
 gerrit change comment 12345 -f comment.txt
 ```
 
-### 发送 Review
+### Submit Review
 
 ```bash
 # Code-Review +2
 gerrit review 12345 --code-review +2 -m "Looks good to me!"
 
 # Code-Review -1 with message
-gerrit review 12345 --code-review -1 -m "需要修改以下问题..."
+gerrit review 12345 --code-review -1 -m "Please fix the following issues..."
 
 # Code-Review +2 and Verified +1
 gerrit review 12345 --code-review +2 --verified +1 -m "LGTM and verified"
 
-# 从文件读取 review 消息
+# Read review message from file
 gerrit review 12345 --code-review +2 -f review.txt
 ```
 
-## 命令参考
+## Command Reference
 
-Gerrit CLI 提供了完善的内置帮助文档。要查看所有可用命令和选项的详细说明，请直接运行：
+Gerrit CLI provides comprehensive built-in help documentation. To view detailed instructions for all available commands and options, simply run:
 
 ```bash
-# 查看所有命令
+# View all commands
 gerrit --help
 
-# 查看特定命令的参数（例如 list）
+# View parameters for a specific command (e.g., list)
 gerrit change list --help
 ```
 
-## Gerrit API 查询语法
+## Gerrit API Query Syntax
 
-`-q/--query` 选项支持 Gerrit 的查询语法。常用查询条件：
+The `-q/--query` option supports Gerrit's query syntax. Common query conditions:
 
-- `status:open` - 开放的 changes
-- `status:merged` - 已合并的 changes
-- `status:abandoned` - 已废弃的 changes
-- `owner:username` - 按所有者筛选
-- `owner:me` - 当前用户的 changes
-- `project:projectname` - 按项目筛选
-- `branch:branchname` - 按分支筛选
-- `is:watched` - 正在关注的 changes
-- `is:reviewer` - 作为 reviewer 的 changes
+- `status:open` - Open changes
+- `status:merged` - Merged changes
+- `status:abandoned` - Abandoned changes
+- `owner:username` - Filter by owner
+- `owner:me` - Changes owned by current user
+- `project:projectname` - Filter by project
+- `branch:branchname` - Filter by branch
+- `is:watched` - Changes being watched
+- `is:reviewer` - Changes where you are a reviewer
 
-可以组合多个条件：
+You can combine multiple conditions:
 
 ```bash
 gerrit change list -q "status:open project:myproject branch:main"
 ```
 
-## 开发
+## Development
 
-### 安装开发依赖
+### Install Development Dependencies
 
 ```bash
 uv sync --extra dev
 ```
 
-### 运行测试
+### Run Tests
 
 ```bash
 uv run pytest
 ```
 
-### 代码格式化
+### Code Formatting
 
 ```bash
 uv run black src/ tests/
 uv run ruff check src/ tests/
 ```
 
-### 类型检查
+### Type Checking
 
 ```bash
 uv run mypy src/
 ```
 
-## 项目结构
+## Project Structure
 
 ```
 gerrit-cli/
 ├── src/gerrit_cli/
 │   ├── __init__.py
 │   ├── __main__.py
-│   ├── cli.py              # CLI 主入口
-│   ├── config.py           # 配置管理
+│   ├── cli.py              # CLI Entry Point
+│   ├── config.py           # Configuration Management
 │   ├── client/
-│   │   ├── api.py          # Gerrit API 客户端
-│   │   ├── auth.py         # 认证处理
-│   │   └── models.py       # 数据模型
+│   │   ├── api.py          # Gerrit API Client
+│   │   ├── auth.py         # Authentication Handling
+│   │   └── models.py       # Data Models
 │   ├── commands/
-│   │   ├── change.py       # change 命令组
-│   │   └── review.py       # review 命令
+│   │   ├── change.py       # 'change' Command Group
+│   │   └── review.py       # 'review' Command
 │   ├── formatters/
-│   │   ├── base.py         # 格式化器基类
-│   │   ├── table.py        # 表格格式化
-│   │   └── json.py         # JSON 格式化
+│   │   ├── base.py         # Formatter Base Class
+│   │   ├── table.py        # Table Formatter
+│   │   └── json.py         # JSON Formatter
 │   └── utils/
-│       ├── exceptions.py   # 自定义异常
-│       └── helpers.py      # 辅助函数
-└── tests/                  # 测试文件
+│       ├── exceptions.py   # Custom Exceptions
+│       └── helpers.py      # Helper Functions
+└── tests/                  # Test Files
 ```
 
-## 技术栈
+## Tech Stack
 
-- **CLI 框架**: [Click](https://click.palletsprojects.com/)
-- **HTTP 客户端**: [httpx](https://www.python-httpx.org/)
-- **数据验证**: [Pydantic](https://docs.pydantic.dev/)
-- **输出格式化**: [Rich](https://rich.readthedocs.io/)
-- **配置管理**: [python-dotenv](https://github.com/theskumar/python-dotenv)
-- **项目管理**: [uv](https://docs.astral.sh/uv/)
+- **CLI Framework**: [Click](https://click.palletsprojects.com/)
+- **HTTP Client**: [httpx](https://www.python-httpx.org/)
+- **Data Validation**: [Pydantic](https://docs.pydantic.dev/)
+- **Output Formatting**: [Rich](https://rich.readthedocs.io/)
+- **Configuration**: [python-dotenv](https://github.com/theskumar/python-dotenv)
+- **Project Management**: [uv](https://docs.astral.sh/uv/)
 
-## 待实现功能
+## Planned Features
 
-- [ ] 草稿评论功能
-- [ ] Submit change 功能
-- [ ] 内联评论（针对特定代码行）
-- [ ] 文件级别的 diff 查看
-- [ ] Reviewer 管理
-- [ ] 批量操作
-- [ ] 配置文件支持（~/.gerrit-cli.yaml）
-- [ ] 命令自动补全
-- [ ] 支持拉取 Relation Chain（依赖链）
-- [ ] 支持拉取指定的 Patch Set
+- [ ] Draft comments
+- [ ] Submit change
+- [ ] Inline comments (for specific code lines)
+- [ ] File-level diff viewing
+- [ ] Reviewer management
+- [ ] Batch operations
+- [ ] Configuration file support (~/.gerrit-cli.yaml)
+- [ ] Command auto-completion
+- [ ] Fetch Relation Chain (dependency chain)
+- [ ] Fetch specific Patch Set
 
-## 常见问题
+## FAQ
 
-### 认证失败
+### Authentication Failed
 
-确保你的用户名和密码正确。推荐使用 Gerrit 的 HTTP Token 而不是账户密码。
+Ensure your username and password are correct. Using Gerrit HTTP Token is recommended instead of account password.
 
-生成 HTTP Token:
-1. 登录 Gerrit
-2. 访问 Settings -> HTTP Credentials
-3. 点击 "GENERATE NEW PASSWORD"
-4. 将生成的 token 设置为 `GERRIT_TOKEN` 环境变量
+Generate HTTP Token:
+1. Log in to Gerrit
+2. Go to Settings -> HTTP Credentials
+3. Click "GENERATE NEW PASSWORD"
+4. Set the generated token as `GERRIT_TOKEN` environment variable
 
-### 网络超时
+### Network Timeout
 
-如果你的 Gerrit 服务器响应较慢，可能会遇到超时问题。当前超时设置为 30 秒，如需调整，请修改 `src/gerrit_cli/client/api.py` 中的 `timeout` 参数。
+If your Gerrit server is slow, you might encounter timeout issues. Current timeout is set to 30 seconds. To adjust, modify the `timeout` parameter in `src/gerrit_cli/client/api.py`.
 
-### 查询语法错误
+### Query Syntax Error
 
-确保查询条件符合 Gerrit 的查询语法。可以参考 [Gerrit 官方文档](https://gerrit-review.googlesource.com/Documentation/user-search.html)。
+Ensure your query conditions comply with Gerrit query syntax. Refer to [Gerrit Official Documentation](https://gerrit-review.googlesource.com/Documentation/user-search.html).
 
-## 参考资源
+## References
 
-- [Gerrit REST API 文档](https://gerrit-review.googlesource.com/Documentation/rest-api.html)
+- [Gerrit REST API Documentation](https://gerrit-review.googlesource.com/Documentation/rest-api.html)
 - [Gerrit Changes API](https://gerrit-review.googlesource.com/Documentation/rest-api-changes.html)
-- [GitHub CLI](https://cli.github.com/) - 设计灵感来源
+- [GitHub CLI](https://cli.github.com/) - Design inspiration
 
-## 许可证
+## License
 
 MIT License
 
-## 贡献
+## Contributing
 
-欢迎提交 Issue 和 Pull Request！
+Issues and Pull Requests are welcome!

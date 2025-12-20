@@ -1,4 +1,4 @@
-"""配置管理模块"""
+"""Configuration management module"""
 
 import os
 from dataclasses import dataclass
@@ -10,7 +10,7 @@ from gerrit_cli.utils.exceptions import ConfigError
 
 @dataclass
 class GerritConfig:
-    """Gerrit 配置"""
+    """Gerrit Configuration"""
 
     url: str
     username: str
@@ -18,28 +18,28 @@ class GerritConfig:
 
     @classmethod
     def from_env(cls) -> "GerritConfig":
-        """从环境变量加载配置
+        """Load configuration from environment variables
 
-        环境变量:
-            GERRIT_URL: Gerrit 服务器 URL
-            GERRIT_USERNAME: 用户名
-            GERRIT_PASSWORD: 密码（优先）
-            GERRIT_TOKEN: HTTP Token（备选）
+        Environment Variables:
+            GERRIT_URL: Gerrit Server URL
+            GERRIT_USERNAME: Username
+            GERRIT_PASSWORD: Password (Preferred)
+            GERRIT_TOKEN: HTTP Token (Alternative)
 
         Returns:
-            GerritConfig: 配置对象
+            GerritConfig: Configuration object
 
         Raises:
-            ConfigError: 配置缺失或无效
+            ConfigError: Missing or invalid configuration
         """
-        # 加载 .env 文件
+        # Load .env file
         load_dotenv()
 
         url = os.getenv("GERRIT_URL")
         username = os.getenv("GERRIT_USERNAME")
         password = os.getenv("GERRIT_PASSWORD") or os.getenv("GERRIT_TOKEN")
 
-        # 验证必要配置
+        # Validate required config
         if not all([url, username, password]):
             missing = []
             if not url:
@@ -50,8 +50,8 @@ class GerritConfig:
                 missing.append("GERRIT_PASSWORD or GERRIT_TOKEN")
 
             raise ConfigError(
-                f"缺少必要的环境变量配置: {', '.join(missing)}\n"
-                f"请设置环境变量或创建 .env 文件（参考 .env.example）"
+                f"Missing required environment variables: {', '.join(missing)}\n"
+                f"Please set environment variables or create a .env file (see .env.example)"
             )
 
         config = cls(url=url, username=username, password=password)
@@ -59,14 +59,14 @@ class GerritConfig:
         return config
 
     def validate(self) -> None:
-        """验证配置有效性
+        """Validate configuration
 
         Raises:
-            ConfigError: 配置无效
+            ConfigError: Invalid configuration
         """
         if not self.url.startswith(("http://", "https://")):
-            raise ConfigError(f"GERRIT_URL 必须是有效的 HTTP(S) URL，当前值: {self.url}")
+            raise ConfigError(f"GERRIT_URL must be a valid HTTP(S) URL, current value: {self.url}")
 
-        # 移除 URL 末尾的斜杠
+        # Remove trailing slash
         if self.url.endswith("/"):
             self.url = self.url.rstrip("/")

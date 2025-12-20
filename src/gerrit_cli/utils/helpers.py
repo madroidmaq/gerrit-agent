@@ -1,23 +1,23 @@
-"""辅助函数"""
+"""Helper Functions"""
 
 import subprocess
 
 
 class GitOperationError(Exception):
-    """Git 操作错误"""
+    """Git Operation Error"""
 
     pass
 
 
 def run_git_command(command: list[str], cwd: str | None = None) -> tuple[bool, str]:
-    """运行 Git 命令
+    """Run Git Command
 
     Args:
-        command: Git 命令列表（如 ['git', 'status']）
-        cwd: 工作目录（可选）
+        command: List of Git command arguments (e.g. ['git', 'status'])
+        cwd: Working directory (optional)
 
     Returns:
-        (成功, 输出内容) 元组
+        Tuple of (Success, Output)
     """
     try:
         result = subprocess.run(
@@ -33,23 +33,23 @@ def run_git_command(command: list[str], cwd: str | None = None) -> tuple[bool, s
 
 
 def check_git_repository(path: str = ".") -> bool:
-    """检查当前目录是否是 Git 仓库
+    """Check if current directory is a Git repository
 
     Args:
-        path: 要检查的路径
+        path: Path to check
 
     Returns:
-        是否是 Git 仓库
+        True if it is a Git repository
     """
     success, _ = run_git_command(["git", "rev-parse", "--git-dir"], cwd=path)
     return success
 
 
 def get_current_branch() -> str | None:
-    """获取当前 Git 分支名称
+    """Get current Git branch name
 
     Returns:
-        分支名称，如果不在分支上则返回 None
+        Branch name, or None if not on a branch
     """
     success, output = run_git_command(["git", "rev-parse", "--abbrev-ref", "HEAD"])
     if success and output != "HEAD":
@@ -58,19 +58,19 @@ def get_current_branch() -> str | None:
 
 
 def check_working_directory_clean() -> tuple[bool, str]:
-    """检查工作区是否干净（没有未提交的修改）
+    """Check if working directory is clean (no uncommitted changes)
 
     Returns:
-        (是否干净, 状态描述) 元组
+        Tuple of (Is Clean, Status Description)
     """
     success, output = run_git_command(["git", "status", "--porcelain"])
     if not success:
-        return False, "无法检查 Git 状态"
+        return False, "Failed to check Git status"
 
     if not output:
-        return True, "工作区干净"
+        return True, "Working directory clean"
 
-    # 统计修改
+    # Count changes
     lines = output.strip().split("\n")
     staged = sum(1 for line in lines if line[0] in "MADRC")
     unstaged = sum(1 for line in lines if line[1] in "MD")
@@ -78,23 +78,23 @@ def check_working_directory_clean() -> tuple[bool, str]:
 
     status_parts = []
     if staged > 0:
-        status_parts.append(f"{staged} 个已暂存的修改")
+        status_parts.append(f"{staged} staged changes")
     if unstaged > 0:
-        status_parts.append(f"{unstaged} 个未暂存的修改")
+        status_parts.append(f"{unstaged} unstaged changes")
     if untracked > 0:
-        status_parts.append(f"{untracked} 个未跟踪的文件")
+        status_parts.append(f"{untracked} untracked files")
 
-    return False, "、".join(status_parts)
+    return False, ", ".join(status_parts)
 
 
 def stash_changes(include_untracked: bool = True) -> tuple[bool, str]:
-    """暂存当前修改
+    """Stash current changes
 
     Args:
-        include_untracked: 是否包含未跟踪的文件
+        include_untracked: Whether to include untracked files
 
     Returns:
-        (是否成功, 消息) 元组
+        Tuple of (Success, Message)
     """
     command = ["git", "stash", "push", "-m", "gerrit-cli: auto stash before fetch"]
     if include_untracked:
@@ -102,47 +102,47 @@ def stash_changes(include_untracked: bool = True) -> tuple[bool, str]:
 
     success, output = run_git_command(command)
     if success:
-        return True, "已使用 stash 保存当前修改"
-    return False, f"Stash 失败: {output}"
+        return True, "Stashed current changes"
+    return False, f"Stash failed: {output}"
 
 
 def pop_stash() -> tuple[bool, str]:
-    """恢复最近的 stash
+    """Pop latest stash
 
     Returns:
-        (是否成功, 消息) 元组
+        Tuple of (Success, Message)
     """
     success, output = run_git_command(["git", "stash", "pop"])
     if success:
-        return True, "已恢复之前的修改"
-    return False, f"恢复 stash 失败: {output}"
+        return True, "Restored previous changes"
+    return False, f"Stash pop failed: {output}"
 
 
 def fetch_change_ref(change_number: str, ref_spec: str) -> tuple[bool, str]:
-    """从 Gerrit 拉取 change 的 ref
+    """Fetch change ref from Gerrit
 
     Args:
-        change_number: Change 编号
-        ref_spec: Ref spec（如 refs/changes/45/12345/1）
+        change_number: Change number
+        ref_spec: Ref spec (e.g. refs/changes/45/12345/1)
 
     Returns:
-        (是否成功, 消息) 元组
+        Tuple of (Success, Message)
     """
     success, output = run_git_command(["git", "fetch", "origin", ref_spec])
     if success:
-        return True, f"已拉取 change {change_number}"
-    return False, f"拉取失败: {output}"
+        return True, f"Fetched change {change_number}"
+    return False, f"Fetch failed: {output}"
 
 
 def checkout_branch(branch_name: str, create: bool = True) -> tuple[bool, str]:
-    """切换到指定分支
+    """Checkout branch
 
     Args:
-        branch_name: 分支名称
-        create: 是否创建新分支
+        branch_name: Branch name
+        create: Whether to create new branch
 
     Returns:
-        (是否成功, 消息) 元组
+        Tuple of (Success, Message)
     """
     if create:
         command = ["git", "checkout", "-b", branch_name]
@@ -151,60 +151,60 @@ def checkout_branch(branch_name: str, create: bool = True) -> tuple[bool, str]:
 
     success, output = run_git_command(command)
     if success:
-        return True, f"已切换到分支 {branch_name}"
-    return False, f"切换分支失败: {output}"
+        return True, f"Switched to branch {branch_name}"
+    return False, f"Failed to checkout branch: {output}"
 
 
 def checkout_fetch_head() -> tuple[bool, str]:
-    """切换到 FETCH_HEAD
+    """Checkout FETCH_HEAD
 
     Returns:
-        (是否成功, 消息) 元组
+        Tuple of (Success, Message)
     """
     success, output = run_git_command(["git", "checkout", "FETCH_HEAD"])
     if success:
-        return True, "已切换到 FETCH_HEAD"
-    return False, f"切换失败: {output}"
+        return True, "Switched to FETCH_HEAD"
+    return False, f"Checkout failed: {output}"
 
 
 def branch_exists(branch_name: str) -> bool:
-    """检查分支是否存在
+    """Check if branch exists
 
     Args:
-        branch_name: 分支名称
+        branch_name: Branch name
 
     Returns:
-        分支是否存在
+        True if branch exists
     """
     success, _ = run_git_command(["git", "rev-parse", "--verify", branch_name])
     return success
 
 
 def delete_branch(branch_name: str, force: bool = False) -> tuple[bool, str]:
-    """删除分支
+    """Delete branch
 
     Args:
-        branch_name: 分支名称
-        force: 是否强制删除
+        branch_name: Branch name
+        force: Whether to force delete
 
     Returns:
-        (是否成功, 消息) 元组
+        Tuple of (Success, Message)
     """
     flag = "-D" if force else "-d"
     success, output = run_git_command(["git", "branch", flag, branch_name])
     if success:
-        return True, f"已删除分支 {branch_name}"
-    return False, f"删除分支失败: {output}"
+        return True, f"Deleted branch {branch_name}"
+    return False, f"Failed to delete branch: {output}"
 
 
 def get_git_remote_url(remote_name: str = "origin") -> str | None:
-    """获取 Git remote 的 URL
+    """Get Git remote URL
 
     Args:
-        remote_name: Remote 名称（默认: origin）
+        remote_name: Remote name (default: origin)
 
     Returns:
-        Remote URL，如果不存在则返回 None
+        Remote URL, or None if not found
     """
     success, output = run_git_command(["git", "remote", "get-url", remote_name])
     if success:
@@ -213,10 +213,10 @@ def get_git_remote_url(remote_name: str = "origin") -> str | None:
 
 
 def get_repo_root() -> str | None:
-    """获取 Git 仓库的根目录
+    """Get Git repository root directory
 
     Returns:
-        仓库根目录的绝对路径，如果不在仓库中则返回 None
+        Absolute path to repo root, or None if not in a repo
     """
     success, output = run_git_command(["git", "rev-parse", "--show-toplevel"])
     if success:
@@ -225,13 +225,13 @@ def get_repo_root() -> str | None:
 
 
 def check_remote_exists(remote_name: str = "origin") -> bool:
-    """检查指定的 remote 是否存在
+    """Check if specified remote exists
 
     Args:
-        remote_name: Remote 名称
+        remote_name: Remote name
 
     Returns:
-        Remote 是否存在
+        True if remote exists
     """
     success, output = run_git_command(["git", "remote"])
     if success:
