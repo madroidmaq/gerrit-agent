@@ -100,44 +100,127 @@ def list(
     default="table",
     help="Output format",
 )
-@click.option("--comments", is_flag=True, help="Show comments")
-@click.option("--messages", is_flag=True, help="Show message history (default)")
-@click.option("--files", is_flag=True, help="Show file list")
+@click.option(
+    "--parts",
+    help=(
+        "指定显示的部分（逗号分隔）。"
+        "可用: metadata(m), files(f), diff(d), messages(msg), comments(c), all。"
+        "默认: m,f,msg"
+    ),
+)
 @click.pass_context
 def view(
     ctx: click.Context,
     change_id: str,
     output_format: str,
-    comments: bool,
-    messages: bool,
-    files: bool,
+    parts: str | None,
 ) -> None:
-    """View change details
+    """查看 change 的详细信息
 
-    CHANGE_ID can be a numeric ID, Change-Id, or full path
+    默认显示：元数据 + 文件列表 + 消息历史（不含 diff，更快）
 
-    Examples:
+    CHANGE_ID 可以是数字 ID 或 Change-Id
+
+    示例：
+        # 默认显示（元数据 + 文件 + 消息）
         gerrit show 12345
-        gerrit show I1234567890abcdef
-        gerrit show 12345 --comments
-        gerrit show 12345 --format json
+
+        # 包含 diff
+        gerrit show 12345 --parts m,f,d
+
+        # 只显示代码差异
+        gerrit show 12345 --parts diff
+        gerrit show 12345 --parts d
+
+        # 显示所有
+        gerrit show 12345 --parts all
+
+        # 自定义组合
+        gerrit show 12345 --parts metadata,diff,comments
+
+    可用部分：
+        metadata (m)   - 基本信息、Owner、Status、Labels
+        files (f)      - 文件列表及统计信息
+        diff (d)       - 代码差异
+        messages (msg) - 消息历史
+        comments (c)   - 内联评论
+        all            - 所有部分
     """
+    from gerrit_cli.utils.show_parts import get_parts_to_show
+
     config = ctx.obj["config"]
 
     try:
-        # Call API to get details
+        # 解析要显示的部分
+        show_parts = get_parts_to_show(parts)
+
         with GerritClient(config.url, config.username, config.password) as client:
+            # 1. 获取基本信息（总是需要）
             change = client.get_change_detail(change_id)
 
-            # If comments are needed
-            if comments:
-                comments_data = client.get_change_comments(change_id)
-                # TODO: add comments to output
+            # 2. 根据需要获取额外数据
+            files_data = None
+            diffs_data = None
+            comments_data = None
 
-        # Format output
-        formatter = get_formatter(output_format)
-        output = formatter.format_change_detail(change, show_comments=comments)
-        click.echo(output)
+            # 获取文件列表（如果需要显示文件或 diff）
+            if show_parts["files"] or show_parts["diff"]:
+                files_data = client.get_change_files(change_id)
+
+            # 获取 diff（如果需要）
+            if show_parts["diff"]:
+                # 检查 diff 大小，避免获取超大 diff
+                total_lines = change.insertions + change.deletions
+                max_lines = 1000  # 最大行数限制
+
+                if total_lines > max_lines:
+                    click.echo(
+                        f"警告：diff 太大（{total_lines} 行），跳过显示。", err=True
+                    )
+                    click.echo(
+                        f"提示：使用 'gerrit checkout {change_id}' 在本地查看。", err=True
+                    )
+                    show_parts["diff"] = False
+                else:
+                    diffs_data = client.get_all_diffs(change_id)
+
+            # 获取评论（如果需要）
+            if show_parts["comments"]:
+                comments_data = client.get_change_comments(change_id)
+
+            # 3. 格式化输出
+            if output_format == "json":
+                import json
+
+                output_data = {
+                    "change": change.model_dump()
+                    if hasattr(change, "model_dump")
+                    else change.__dict__,
+                }
+                if files_data:
+                    output_data["files"] = files_data
+                if diffs_data:
+                    output_data["diffs"] = diffs_data
+                if comments_data:
+                    output_data["comments"] = comments_data
+
+                click.echo(json.dumps(output_data, indent=2, ensure_ascii=False))
+            else:
+                # Table 格式 - 使用完整视图
+                formatter = get_formatter(output_format)
+                output = formatter.format_change_complete(
+                    change,
+                    files=files_data,
+                    diffs=diffs_data,
+                    comments=comments_data,
+                    show_parts=show_parts,
+                )
+                click.echo(output)
+
+    except ValueError as e:
+        # --parts 选项解析错误
+        click.echo(f"错误: {e}", err=True)
+        sys.exit(1)
 
     except GerritCliError as e:
         click.echo(f"Error: {e}", err=True)

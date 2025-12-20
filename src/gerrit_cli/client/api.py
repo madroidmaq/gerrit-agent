@@ -228,3 +228,75 @@ class GerritClient:
         """
         review_input = ReviewInput(message=message)
         return self.set_review(change_id, "current", review_input)
+
+    # ==================== Files and Diffs API ====================
+
+    def get_change_files(self, change_id: str, revision_id: str = "current") -> dict[str, Any]:
+        """Get list of files changed in a revision
+
+        Args:
+            change_id: Change ID
+            revision_id: Revision ID (default: "current")
+
+        Returns:
+            Dictionary mapping file paths to file info
+            Format: {
+                "file_path": {
+                    "status": "M",  # M=Modified, A=Added, D=Deleted
+                    "lines_inserted": 10,
+                    "lines_deleted": 5,
+                    "size_delta": 100,
+                    "size": 1000
+                }
+            }
+        """
+        data = self._make_request("GET", f"/changes/{change_id}/revisions/{revision_id}/files/")
+        return data
+
+    def get_file_diff(
+        self, change_id: str, file_path: str, revision_id: str = "current"
+    ) -> dict[str, Any]:
+        """Get diff for a specific file
+
+        Args:
+            change_id: Change ID
+            file_path: File path
+            revision_id: Revision ID (default: "current")
+
+        Returns:
+            Diff data in Gerrit format
+        """
+        from urllib.parse import quote
+
+        # URL encode the file path
+        encoded_path = quote(file_path, safe="")
+        data = self._make_request(
+            "GET", f"/changes/{change_id}/revisions/{revision_id}/files/{encoded_path}/diff"
+        )
+        return data
+
+    def get_all_diffs(self, change_id: str, revision_id: str = "current") -> dict[str, Any]:
+        """Get diffs for all files in a change
+
+        Args:
+            change_id: Change ID
+            revision_id: Revision ID (default: "current")
+
+        Returns:
+            Dictionary mapping file paths to their diff data
+        """
+        files = self.get_change_files(change_id, revision_id)
+        diffs = {}
+
+        for file_path in files.keys():
+            # Skip commit message and other special files
+            if file_path in ["/COMMIT_MSG", "/MERGE_LIST"]:
+                continue
+
+            try:
+                diffs[file_path] = self.get_file_diff(change_id, file_path, revision_id)
+            except (ApiError, NotFoundError):
+                # Some files might not have diffs (e.g., binary files)
+                continue
+
+        return diffs
