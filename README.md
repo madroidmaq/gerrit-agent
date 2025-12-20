@@ -1,4 +1,4 @@
-# Gerrit CLI
+查看当前项目中内容，根据 readme 中的内容新建# Gerrit CLI
 
 Gerrit Code Review 的命令行工具，参考 GitHub CLI 的设计理念，让你可以通过命令行高效地进行代码审查。
 
@@ -121,6 +121,48 @@ gerrit change view 12345 --comments
 gerrit change view 12345 --format json
 ```
 
+### 拉取 Change 到本地
+
+```bash
+# 拉取 change 到本地新分支进行测试或审查
+gerrit change fetch 12345
+
+# 指定自定义分支名称
+gerrit change fetch 12345 -b my-review-branch
+
+# 如果分支已存在，强制删除并重新创建
+gerrit change fetch 12345 --force
+
+# 只拉取不切换分支（保持在当前分支）
+gerrit change fetch 12345 --no-checkout
+
+# 自动 stash 未提交的修改
+gerrit change fetch 12345 --stash
+
+# 不使用 stash，强制继续（可能丢失修改）
+gerrit change fetch 12345 --no-stash
+```
+
+**处理未提交的修改：**
+
+fetch 命令会检查工作区状态，如果有未提交的修改，会提供以下选项：
+
+1. **使用 stash 保存（推荐）**：自动执行 `git stash`，在拉取完成后可以使用 `git stash pop` 恢复
+2. **取消操作**：让你先手动处理当前修改
+3. **强制继续**：直接切换分支（可能丢失未提交的修改）
+
+你也可以使用 `--stash` 或 `--no-stash` 选项跳过询问。
+
+**仓库验证：**
+
+fetch 命令会智能检查当前仓库是否与 Change 匹配：
+
+1. **不在 Git 仓库中**：会提示你需要 cd 到 Git 仓库目录
+2. **没有 origin remote**：会警告并询问是否继续
+3. **仓库与 Change 项目不匹配**：会警告并提供建议，防止在错误的仓库中拉取代码
+
+这些检查确保你不会在错误的目录或仓库中执行 fetch 操作。
+
 ### 添加评论
 
 ```bash
@@ -149,55 +191,15 @@ gerrit review 12345 --code-review +2 -f review.txt
 
 ## 命令参考
 
-### `gerrit change list`
+Gerrit CLI 提供了完善的内置帮助文档。要查看所有可用命令和选项的详细说明，请直接运行：
 
-列出 changes。
+```bash
+# 查看所有命令
+gerrit --help
 
-**选项：**
-- `-q, --query TEXT`: 查询条件（默认: `status:open`）
-- `-n, --limit INTEGER`: 返回结果数量（默认: 25）
-- `-o, --owner TEXT`: 按所有者筛选（使用 `me` 表示当前用户）
-- `-p, --project TEXT`: 按项目筛选
-- `--format [table|json]`: 输出格式（默认: table）
-
-### `gerrit change view`
-
-查看 change 详情。
-
-**参数：**
-- `CHANGE_ID`: Change ID（可以是数字 ID、Change-Id 或完整路径）
-
-**选项：**
-- `--format [table|json]`: 输出格式（默认: table）
-- `--comments`: 显示评论
-- `--messages`: 显示消息历史
-- `--files`: 显示文件列表
-
-### `gerrit change comment`
-
-添加评论到 change。
-
-**参数：**
-- `CHANGE_ID`: Change ID
-
-**选项：**
-- `-m, --message TEXT`: 评论内容
-- `-f, --file PATH`: 从文件读取评论内容
-- `--draft`: 保存为草稿（暂未实现）
-
-### `gerrit review`
-
-发送 review（打分+评论）。
-
-**参数：**
-- `CHANGE_ID`: Change ID
-
-**选项：**
-- `-m, --message TEXT`: Review 消息
-- `--code-review [+2|+1|0|-1|-2]`: Code-Review 打分
-- `--verified [+1|0|-1]`: Verified 打分
-- `-f, --file PATH`: 从文件读取消息
-- `--submit`: Review 后直接提交（暂未实现）
+# 查看特定命令的参数（例如 list）
+gerrit change list --help
+```
 
 ## Gerrit API 查询语法
 
@@ -291,6 +293,8 @@ gerrit-cli/
 - [ ] 批量操作
 - [ ] 配置文件支持（~/.gerrit-cli.yaml）
 - [ ] 命令自动补全
+- [ ] 支持拉取 Relation Chain（依赖链）
+- [ ] 支持拉取指定的 Patch Set
 
 ## 常见问题
 

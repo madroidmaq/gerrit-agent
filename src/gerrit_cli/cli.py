@@ -23,6 +23,10 @@ def main(ctx: click.Context) -> None:
     # 确保 ctx.obj 存在
     ctx.ensure_object(dict)
 
+    # 如果是查看帮助信息，不需要加载配置
+    if "--help" in sys.argv or len(sys.argv) == 1:
+        return
+
     try:
         # 加载配置并存储在 context 中
         ctx.obj["config"] = GerritConfig.from_env()
