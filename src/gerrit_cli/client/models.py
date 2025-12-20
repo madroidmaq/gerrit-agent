@@ -102,11 +102,22 @@ class CommentInfo(BaseModel):
     in_reply_to: str | None = None
 
 
+
+class CommentRange(BaseModel):
+    """Comment Range"""
+
+    start_line: int
+    start_character: int
+    end_line: int
+    end_character: int
+
+
 class CommentInput(BaseModel):
     """Comment Input"""
 
     path: str | None = None
     line: int | None = None
+    range: CommentRange | None = None
     message: str
     side: str = "REVISION"
     in_reply_to: str | None = None
