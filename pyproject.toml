@@ -1,5 +1,5 @@
 [project]
-name = "gerrit-agent"
+name = "gerrit-agent-skill"
 version = "0.1.0"
 description = "An AI-powered Agent and CLI for Gerrit Code Review"
 readme = "README.md"
@@ -8,6 +8,23 @@ authors = [
     { name = "madroid", email = "madroidmaq@gmail.com" }
 ]
 requires-python = ">=3.10"
+keywords = [
+    "gerrit",
+    "code-review",
+    "cli",
+    "ai",
+    "llm",
+    "agent",
+    "claude-code",
+    "gemini-cli",
+    "codex",
+    "git",
+    "devtools",
+    "code-analysis",
+    "github-cli",
+    "ai-powered",
+    "code-quality",
+]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -19,6 +36,9 @@ classifiers = [
     "Operating System :: OS Independent",
     "Environment :: Console",
     "Topic :: Software Development :: Version Control :: Git",
+    "Topic :: Software Development :: Code Review",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Utilities",
 ]
 dependencies = [
     "click>=8.1.0",
@@ -29,9 +49,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/madroid/gerrit-cli"
-Repository = "https://github.com/madroid/gerrit-cli"
-Issues = "https://github.com/madroid/gerrit-cli/issues"
+Homepage = "https://github.com/madroidmaq/gerrit-agent-skill"
+Repository = "https://github.com/madroidmaq/gerrit-agent-skill"
+Issues = "https://github.com/madroidmaq/gerrit-agent-skill/issues"
 
 [project.scripts]
 gerrit = "gerrit_cli.cli:main"

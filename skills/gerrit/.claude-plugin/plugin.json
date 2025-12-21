@@ -5,7 +5,7 @@
   "author": {
     "name": "Gerrit CLI Team"
   },
-  "homepage": "https://github.com/your-repo/gerrit-cli",
-  "repository": "https://github.com/your-repo/gerrit-cli",
+  "homepage": "https://github.com/madroid/gerrit-agent-skill",
+  "repository": "https://github.com/madroid/gerrit-agent-skill",
   "license": "MIT"
 }

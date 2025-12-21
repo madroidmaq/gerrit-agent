@@ -4,7 +4,7 @@
 
 **AI-Powered Code Review Assistant for Gerrit**
 
-[![PyPI version](https://badge.fury.io/py/gerrit-agent.svg)](https://badge.fury.io/py/gerrit-agent)
+[![PyPI version](https://badge.fury.io/py/gerrit-agent-skill.svg)](https://badge.fury.io/py/gerrit-agent-skill)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
@@ -50,7 +50,7 @@ HTTP token auth • Rich terminal UI • `.env` config • Comprehensive tests
 
 **Install:**
 ```bash
-pip install gerrit-agent
+pip install gerrit-agent-skill
 ```
 
 **Configure:**
@@ -75,7 +75,7 @@ Multi-agent code review with confidence scoring.
 
 ```bash
 # Install skill
-claude --skill-dir /path/to/gerrit-cli/skills/gerrit
+claude --skill-dir /path/to/gerrit-agent-skill/skills/gerrit
 
 # Use it
 /gerrit:review 12345
@@ -93,7 +93,7 @@ Natural language code reviews with "Principal Software Engineer" persona.
 
 ```bash
 # Install
-gemini extensions link https://github.com/madroidmaq/gerrit-cli/gemini-cli-extensions
+gemini extensions link https://github.com/madroidmaq/gerrit-agent-skill/gemini-cli-extensions
 
 # Use it
 gemini "Review change 12345"
@@ -134,10 +134,10 @@ gerrit review 12345 --code-review +2 -m "LGTM!"
 
 ## 🤝 Contributing
 
-Contributions welcome! See [Issues](https://github.com/madroidmaq/gerrit-cli/issues) for planned features.
+Contributions welcome! See [Issues](https://github.com/madroidmaq/gerrit-agent-skill/issues) for planned features.
 
 ```bash
-git clone https://github.com/madroidmaq/gerrit-cli.git && cd gerrit-cli
+git clone https://github.com/madroidmaq/gerrit-agent-skill.git && cd gerrit-agent-skill
 uv sync --extra dev && uv run pytest
 ```
 
@@ -156,6 +156,6 @@ Built with [Click](https://click.palletsprojects.com/), [Rich](https://rich.read
 
 **If you find this helpful, please ⭐ star the repo!**
 
-[Report Bug](https://github.com/madroidmaq/gerrit-cli/issues) • [Request Feature](https://github.com/madroidmaq/gerrit-cli/issues)
+[Report Bug](https://github.com/madroidmaq/gerrit-agent-skill/issues) • [Request Feature](https://github.com/madroidmaq/gerrit-agent-skill/issues)
 
 </div>

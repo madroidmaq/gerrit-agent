@@ -1,6 +1,6 @@
 ---
 allowed-tools: Bash(gerrit:*), Bash(git:*)
-description: Code review a Gerrit change using gerrit-cli
+description: Code review a Gerrit change using gerrit-agent-skill
 disable-model-invocation: false
 ---
 
@@ -17,7 +17,7 @@ gerrit --version
 If not installed, show this message:
 ```
 Error: gerrit CLI not found. Please install it first:
-https://github.com/your-repo/gerrit-cli
+https://github.com/madroid/gerrit-agent-skill
 
 Required environment variables:
   GERRIT_URL          - Your Gerrit server URL

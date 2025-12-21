@@ -11,7 +11,7 @@ Automated code review for Gerrit changes using Claude AI with multi-agent analys
 
 ## Prerequisites
 
-- [Gerrit CLI](https://github.com/your-repo/gerrit-cli) installed and configured
+- [Gerrit Agent Skill](https://github.com/madroid/gerrit-agent-skill) installed and configured
 - Git repository (current directory)
 - Environment variables:
   ```bash
@@ -25,8 +25,8 @@ Automated code review for Gerrit changes using Claude AI with multi-agent analys
 ### Local Development
 
 ```bash
-# Navigate to your gerrit-cli directory
-cd /path/to/gerrit-cli
+# Navigate to your gerrit-agent-skill directory
+cd /path/to/gerrit-agent-skill
 
 # Start Claude Code with the skill
 claude --skill-dir ./skills/gerrit

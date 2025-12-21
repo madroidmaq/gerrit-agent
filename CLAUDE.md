@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Gerrit CLI is a command-line tool for Gerrit Code Review, inspired by GitHub CLI. It allows users to perform code reviews efficiently from the terminal using Python and Click framework.
+Gerrit Agent Skill is an AI-powered code review platform that integrates cutting-edge Code Agents with Gerrit Code Review. It provides both a command-line tool (inspired by GitHub CLI) and Claude Agent Skills for automated code analysis. Built using Python and Click framework.
 
 ## Development Commands
 
@@ -125,7 +125,7 @@ The `change fetch` command implements a complex workflow:
 When modifying fetch logic, maintain these safety checks in order.
 
 ### Testing with respx
-Tests use `respx` library to mock httpx requests. See `tests/conftest.py` for fixtures.
+Tests use `respx` library to mock httpx requests for API testing.
 
 ## Configuration Notes
 
