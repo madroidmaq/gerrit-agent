@@ -1,134 +1,161 @@
-# Gerrit Agent: AI-Powered Gerrit Assistant
+<div align="center">
 
-**gerrit-agent** (formerly `gerrit-cli`) is a next-generation command-line interface and AI Agent for Gerrit Code Review. It goes beyond simple API wrappers by integrating with LLMs to act as your intelligent copilot for code reviews.
+# 🤖 Gerrit Agent
 
-> **Note:** This project has been renamed from `gerrit-cli` to `gerrit-agent` to better reflect its AI capabilities.
+**AI-Powered Code Review Assistant for Gerrit**
 
-## 🚀 Key Features
+[![PyPI version](https://badge.fury.io/py/gerrit-agent.svg)](https://badge.fury.io/py/gerrit-agent)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
-*   **🤖 AI-Powered Review Agent**: Integrates with Gemini CLI to automatically analyze changes and post inline comments.
-*   **💻 Modern CLI**: A human-friendly terminal interface for Gerrit (List, Show, Checkout, Review).
-*   **🔌 Extensible**: Designed to work as a Gemini CLI Extension and (soon) a Claude Code / MCP server.
-*   **🛠️ Developer Friendly**: Built with `click`, `rich`, and `httpx`.
+Transform your Gerrit code reviews with AI-powered analysis using **Claude Code**, **Gemini CLI**, and other advanced Code Agents.
+
+[Features](#-features) • [Quick Start](#-quick-start) • [Usage](#-usage-modes) • [Documentation](#-documentation) • [Contributing](#-contributing)
+
+</div>
 
 ---
 
-## 🛠️ Installation & Configuration
+## 📖 Overview
 
-All modes (CLI, Gemini Agent, MCP) require the base python package and configuration.
+**Gerrit Agent** is an AI-powered code review platform that integrates cutting-edge Code Agents (Claude Code, Gemini CLI, etc.) with Gerrit Code Review. It provides automated code analysis, intelligent inline comments, and multi-agent review workflows - all directly from your terminal.
 
-### 1. Install
+### Why Gerrit Agent?
 
+- 🧠 **Multiple AI Agents**: Use Claude, Gemini, or any Claude Agent Skill Protocol-compatible agent
+- 🎯 **Smart Reviews**: Multi-agent analysis with confidence scoring (only shows high-confidence findings ≥80%)
+- 💬 **Inline Comments**: Automatically posts structured feedback directly to Gerrit changes
+- ⚡ **Fast CLI**: Modern, GitHub CLI-like interface for Gerrit operations
+- 🔌 **Extensible**: Built on open protocols, works with any compatible Code Agent
+
+---
+
+## ✨ Features
+
+**🤖 AI Agent Integrations:**
+- Claude Code Skill (multi-agent review, confidence scoring)
+- Gemini CLI Extension (natural language reviews)
+- Compatible with Claude Agent Skill Protocol
+
+**💻 CLI Operations:**
+List, view, checkout, review changes • Inline comments • JSON/Table output
+
+**🛡️ Developer-Friendly:**
+HTTP token auth • Rich terminal UI • `.env` config • Comprehensive tests
+
+---
+
+
+## 🚀 Quick Start
+
+**Install:**
 ```bash
 pip install gerrit-agent
 ```
 
-### 2. Configure Environment
-
-Create a `.env` file in your working directory or export these variables:
-
+**Configure:**
 ```bash
-# Gerrit Server Configuration
 export GERRIT_URL=https://gerrit.example.com
 export GERRIT_USERNAME=your_username
-export GERRIT_PASSWORD=your_password 
-# Or use HTTP Token (Recommended)
-# export GERRIT_TOKEN=your_http_token
+export GERRIT_TOKEN=your_http_token
+```
+
+**Verify:**
+```bash
+gerrit --help
 ```
 
 ---
 
-## 🤖 Mode 1: Gemini CLI Extension (Recommended)
+## 🎯 Usage Modes
 
-**Turn your terminal into a Principal Software Engineer.** 
+### 🤖 Claude Code Skill
 
-By linking `gerrit-agent` with the Gemini CLI, you can use natural language to interact with Gerrit and perform automated code reviews.
-
-### Setup
-
-Assuming you have the Gemini CLI installed, link this extension:
+Multi-agent code review with confidence scoring.
 
 ```bash
-# If you cloned the repo locally
-gemini extensions link ./gemini-cli-extensions
+# Install skill
+claude --skill-dir /path/to/gerrit-cli/skills/gerrit
 
-# Or via URL (once published)
-# gemini extensions link https://github.com/madroid/gerrit-agent/gemini-cli-extensions
+# Use it
+/gerrit:review 12345
 ```
 
-### Usage
+Features: 3 specialized analyzers, confidence scoring (≥80%), user confirmation before posting.
 
-**Automated Code Review:**
-Ask the agent to review a specific change ID. It will fetch the diff, analyze it, and post inline comments directly to Gerrit.
+📚 [Full documentation →](skills/gerrit/README.md)
+
+---
+
+### 🧠 Gemini CLI Extension
+
+Natural language code reviews with "Principal Software Engineer" persona.
 
 ```bash
+# Install
+gemini extensions link https://github.com/madroidmaq/gerrit-cli/gemini-cli-extensions
+
+# Use it
 gemini "Review change 12345"
-# or use the command alias
-gemini /code-review 12345
+gemini /gerrit:review 12345
 ```
 
-**Summarize Changes:**
-```bash
-gemini "Summarize what change 12345 does"
-```
+📚 [Full documentation →](gemini-cli-extensions/README.md)
 
 ---
 
-## 💻 Mode 2: Standalone CLI
+### 💻 Standalone CLI
 
-For precise control, use the `gerrit` command directly. It mimics the GitHub CLI (`gh`) experience.
-
-> 📖 **Full Documentation**: For a complete list of commands, flags, and advanced usage (including checkout options and query syntax), please see the [**CLI Reference Guide**](docs/CLI_REFERENCE.md).
-
-### Common Commands
-
-| Action | Command | Alias |
-|--------|---------|-------|
-| **List** | `gerrit list` | `gerrit change list` |
-| **Show** | `gerrit show <id>` | `gerrit change view` |
-| **Checkout** | `gerrit checkout <id>` | `gerrit change checkout` |
-| **Review** | `gerrit review <id>` | |
-
-### Quick Examples
+GitHub CLI-like experience for Gerrit operations.
 
 ```bash
-# List open changes assigned to you
+# List changes
 gerrit list --owner me --status open
 
-# Checkout a change to a local branch
-gerrit checkout 12345
+# View change
+gerrit show 12345 --diff
 
-# Submit a +2 Code-Review
+# Checkout and review
+gerrit checkout 12345
 gerrit review 12345 --code-review +2 -m "LGTM!"
 ```
 
----
-
-## 🧠 Mode 3: Claude Code Agent (Coming Soon)
-
-We are actively working on an **MCP (Model Context Protocol)** server implementation. This will allow `gerrit-agent` to serve as a tool for Claude Code and other MCP-compatible assistants.
-
-*   **Capabilities:** Claude will be able to search Gerrit, read file content, and understand the context of large relation chains.
-*   **Status:** 🚧 In Development
+📚 [Full CLI reference →](docs/CLI_REFERENCE.md)
 
 ---
 
-## 📦 Project Structure
+## 📚 Documentation
 
-```
-gerrit-agent/
-├── gemini-cli-extensions/  # Configuration for Gemini CLI
-├── src/gerrit_cli/         # Core Python Logic
-│   ├── client/             # Gerrit REST API Client
-│   ├── commands/           # Click CLI Commands
-│   └── ...
-└── tests/                  # Pytest Suite
-```
+- [CLI Reference](docs/CLI_REFERENCE.md)
+- [Claude Skill Setup](skills/gerrit/README.md)
+- [Gemini Extension](gemini-cli-extensions/README.md)
+
+---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please check the [issues](https://github.com/madroid/gerrit-agent/issues) for planned features like Draft Comments and Batch Operations.
+Contributions welcome! See [Issues](https://github.com/madroidmaq/gerrit-cli/issues) for planned features.
 
-## License
+```bash
+git clone https://github.com/madroidmaq/gerrit-cli.git && cd gerrit-cli
+uv sync --extra dev && uv run pytest
+```
 
-MIT License
+---
+
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) file.
+
+---
+
+<div align="center">
+
+Built with [Click](https://click.palletsprojects.com/), [Rich](https://rich.readthedocs.io/), [httpx](https://www.python-httpx.org/), [Pydantic](https://pydantic-docs.helpmanual.io/)
+
+**If you find this helpful, please ⭐ star the repo!**
+
+[Report Bug](https://github.com/madroidmaq/gerrit-cli/issues) • [Request Feature](https://github.com/madroidmaq/gerrit-cli/issues)
+
+</div>
