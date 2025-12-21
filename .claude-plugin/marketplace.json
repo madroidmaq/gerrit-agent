@@ -1,0 +1,20 @@
+{
+  "name": "gerrit-agent-skills",
+  "owner": {
+    "name": "madroid",
+    "email": "madroidmaq@gmail.com"
+  },
+  "metadata": {
+    "description": "Gerrit code review automation skills for Claude Code",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "gerrit-agent-skills",
+      "description": "Automated code review for Gerrit changes with multi-agent analysis, confidence scoring, and inline comment posting",
+      "source": "./",
+      "strict": false,
+      "skills": ["./skills/gerrit"]
+    }
+  ]
+}

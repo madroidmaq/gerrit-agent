@@ -1,0 +1,11 @@
+{
+  "name": "gerrit",
+  "description": "Gerrit code review automation with multi-agent analysis and confidence scoring",
+  "version": "1.0.0",
+  "author": {
+    "name": "Gerrit CLI Team"
+  },
+  "homepage": "https://github.com/your-repo/gerrit-cli",
+  "repository": "https://github.com/your-repo/gerrit-cli",
+  "license": "MIT"
+}
