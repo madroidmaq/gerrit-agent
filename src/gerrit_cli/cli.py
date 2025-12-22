@@ -70,6 +70,7 @@ main.add_command(review)
 # Root-level Alias (Scheme B)
 main.add_command(change.commands["list"], name="list")
 main.add_command(change.commands["view"], name="view")
+main.add_command(change.commands["view"], name="show")
 main.add_command(change.commands["checkout"], name="checkout")
 
 # Group Alias (Scheme A)
