@@ -276,3 +276,117 @@ class TestFormatterParameters:
         result2 = formatter.format_change_detail(sample_change_detail, show_comments=True)
 
         assert result1 == result2
+
+
+class TestJsonFormatterAdvancedScenarios:
+    """Test advanced scenarios and edge cases"""
+
+    def test_json_format_different_statuses(self, sample_account):
+        """Test formatting changes with different statuses"""
+        statuses = ["NEW", "MERGED", "ABANDONED", "SUBMITTED"]
+        changes = []
+
+        for i, status in enumerate(statuses):
+            change = Change(
+                id=f"project~main~I{i}",
+                project="test",
+                branch="main",
+                change_id=f"I{i}",
+                subject=f"Change {i}",
+                status=status,
+                created="2025-01-01 00:00:00.000000000",
+                updated="2025-01-01 00:00:00.000000000",
+                number=1000 + i,
+            )
+            changes.append(change)
+
+        formatter = JsonFormatter()
+        result = formatter.format_changes(changes)
+
+        data = json.loads(result)
+        assert len(data) == 4
+        for i, item in enumerate(data):
+            assert item["status"] == statuses[i]
+
+    def test_json_format_large_numbers(self, sample_account):
+        """Test formatting changes with very large insertions/deletions"""
+        change = Change(
+            id="test~main~I999",
+            project="test",
+            branch="main",
+            change_id="I999",
+            subject="Large change",
+            status="NEW",
+            created="2025-01-01 00:00:00.000000000",
+            updated="2025-01-01 00:00:00.000000000",
+            number=99999,
+            insertions=999999,
+            deletions=888888,
+            owner=sample_account,
+        )
+
+        formatter = JsonFormatter()
+        result = formatter.format_changes([change])
+
+        data = json.loads(result)
+        assert data[0]["number"] == 99999
+        assert data[0]["insertions"] == 999999
+        assert data[0]["deletions"] == 888888
+
+    def test_json_format_timestamp_format(self, sample_change):
+        """Test timestamp fields are preserved correctly in Gerrit format"""
+        formatter = JsonFormatter()
+        result = formatter.format_changes([sample_change])
+
+        data = json.loads(result)
+        # Gerrit timestamps: "YYYY-MM-DD HH:MM:SS.000000000"
+        assert data[0]["created"] == "2025-01-01 10:00:00.000000000"
+        assert data[0]["updated"] == "2025-01-10 15:30:00.000000000"
+        assert "." in data[0]["created"]
+        assert len(data[0]["created"].split(".")[-1]) == 9  # 9 decimal places
+
+    def test_json_format_none_current_revision(self, sample_account):
+        """Test Change with None current_revision"""
+        change = Change(
+            id="test~main~I123",
+            project="test",
+            branch="main",
+            change_id="I123",
+            subject="Test",
+            status="NEW",
+            created="2025-01-01 00:00:00.000000000",
+            updated="2025-01-01 00:00:00.000000000",
+            number=100,
+            owner=sample_account,
+            current_revision=None,
+        )
+
+        formatter = JsonFormatter()
+        result = formatter.format_changes([change])
+
+        data = json.loads(result)
+        assert data[0]["current_revision"] is None
+
+    def test_json_format_zero_insertions_deletions(self, sample_account):
+        """Test Change with zero insertions and deletions"""
+        change = Change(
+            id="test~main~I456",
+            project="test",
+            branch="main",
+            change_id="I456",
+            subject="No code changes",
+            status="NEW",
+            created="2025-01-01 00:00:00.000000000",
+            updated="2025-01-01 00:00:00.000000000",
+            number=200,
+            insertions=0,
+            deletions=0,
+            owner=sample_account,
+        )
+
+        formatter = JsonFormatter()
+        result = formatter.format_changes([change])
+
+        data = json.loads(result)
+        assert data[0]["insertions"] == 0
+        assert data[0]["deletions"] == 0

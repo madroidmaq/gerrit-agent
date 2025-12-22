@@ -276,3 +276,37 @@ class TestViewCommandJsonOutput:
         assert data["comments"]["src/main.py"][0]["line"] == 42
         assert data["comments"]["src/main.py"][0]["message"] == "This needs improvement"
         assert data["comments"]["src/main.py"][0]["unresolved"] is True
+
+    @respx.mock
+    def test_list_command_json_with_more_changes(self, runner, gerrit_env, sample_change_api_response):
+        """Test list command with _more_changes flag"""
+        change_with_more = {**sample_change_api_response, "_more_changes": True}
+
+        respx.get("https://gerrit.example.com/a/changes/").mock(
+            return_value=Response(200, text=")]}'\n" + json.dumps([change_with_more]))
+        )
+
+        result = runner.invoke(cli, ["list", "--format", "json"], env=gerrit_env)
+
+        assert result.exit_code == 0
+        data = json.loads(result.output)
+        assert len(data) == 1
+        assert data[0]["more_changes"] is True
+
+    @respx.mock
+    def test_list_command_json_with_limit(self, runner, gerrit_env, sample_change_api_response):
+        """Test list command with custom limit parameter"""
+        route = respx.get("https://gerrit.example.com/a/changes/").mock(
+            return_value=Response(200, text=")]}'\n" + json.dumps([sample_change_api_response]))
+        )
+
+        result = runner.invoke(
+            cli, ["list", "--limit", "50", "--format", "json"], env=gerrit_env
+        )
+
+        assert result.exit_code == 0
+        assert route.called
+        assert "n=50" in str(route.calls.last.request.url)
+
+        data = json.loads(result.output)
+        assert len(data) == 1
