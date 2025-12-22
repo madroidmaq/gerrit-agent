@@ -78,7 +78,7 @@ def list(
         # Call API
         with GerritClient(config.url, config.username, config.password) as client:
             changes = client.list_changes(
-                query=final_query, options=["CURRENT_REVISION", "LABELS"], limit=limit
+                query=final_query, options=["CURRENT_REVISION", "LABELS", "DETAILED_ACCOUNTS"], limit=limit
             )
 
         # Format output
@@ -336,7 +336,7 @@ def checkout(
         # 2. Get change info from Gerrit
         click.echo(f"Fetching info for Change {change_id}...")
         with GerritClient(config.url, config.username, config.password) as client:
-            change = client.get_change(change_id, options=["CURRENT_REVISION", "DOWNLOAD_COMMANDS"])
+            change = client.get_change(change_id, options=["CURRENT_REVISION", "DOWNLOAD_COMMANDS", "DETAILED_ACCOUNTS"])
 
         # 3. Verify current repo matches project
         repo_root = get_repo_root()

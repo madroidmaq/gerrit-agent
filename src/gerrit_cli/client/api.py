@@ -192,7 +192,7 @@ class GerritClient:
             ChangeDetail object
         """
         return self.get_change(
-            change_id, options=["CURRENT_REVISION", "MESSAGES", "DETAILED_LABELS"]
+            change_id, options=["CURRENT_REVISION", "MESSAGES", "DETAILED_LABELS", "DETAILED_ACCOUNTS"]
         )
 
     # ==================== Review API ====================
