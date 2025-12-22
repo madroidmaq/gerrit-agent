@@ -1,8 +1,8 @@
-"""gerrit show 命令的部分显示工具"""
+"""Display parts utility for gerrit show command"""
 
 from typing import Optional
 
-# 可用部分及其缩写
+# Available parts and their abbreviations
 AVAILABLE_PARTS = {
     "metadata": "m",
     "files": "f",
@@ -11,27 +11,27 @@ AVAILABLE_PARTS = {
     "comments": "c",
 }
 
-# 默认显示的部分（不含 diff，加快速度）
+# Default parts to display (excluding diff for faster performance)
 DEFAULT_PARTS = ["metadata", "files", "messages", "comments"]
 
 
 def parse_parts_option(parts_str: str) -> list[str]:
-    """解析 --parts 选项
+    """Parse --parts option
 
-    支持格式：
-    - "all" -> 所有部分
-    - "m,f,d" -> 缩写
-    - "metadata,files,diff" -> 完整名称
-    - "m,files,d" -> 混合
+    Supported formats:
+    - "all" -> All parts
+    - "m,f,d" -> Abbreviations
+    - "metadata,files,diff" -> Full names
+    - "m,files,d" -> Mixed
 
     Args:
-        parts_str: --parts 选项的值
+        parts_str: Value of --parts option
 
     Returns:
-        部分名称列表（完整名称）
+        List of part names (full names)
 
     Raises:
-        ValueError: 如果包含未知的部分名称
+        ValueError: If contains unknown part names
 
     Examples:
         >>> parse_parts_option("m,f,d")
@@ -43,11 +43,11 @@ def parse_parts_option(parts_str: str) -> list[str]:
         >>> parse_parts_option("all")
         ['metadata', 'files', 'diff', 'messages', 'comments']
     """
-    # 特殊值：all
+    # Special value: all
     if parts_str == "all":
         return list(AVAILABLE_PARTS.keys())
 
-    # 解析逗号分隔的值
+    # Parse comma-separated values
     parts = []
     abbr_to_full = {abbr: full for full, abbr in AVAILABLE_PARTS.items()}
 
@@ -57,14 +57,14 @@ def parse_parts_option(parts_str: str) -> list[str]:
         if not item:
             continue
 
-        # 检查是否是完整名称
+        # Check if it's a full name
         if item in AVAILABLE_PARTS:
             parts.append(item)
-        # 检查是否是缩写
+        # Check if it's an abbreviation
         elif item in abbr_to_full:
             parts.append(abbr_to_full[item])
         else:
-            # 未知的部分
+            # Unknown part
             available = []
             for full, abbr in AVAILABLE_PARTS.items():
                 available.append(f"{full}({abbr})")
@@ -77,19 +77,19 @@ def parse_parts_option(parts_str: str) -> list[str]:
 
 
 def get_parts_to_show(parts_option: Optional[str] = None) -> dict[str, bool]:
-    """获取要显示的部分
+    """Get parts to display
 
     Args:
-        parts_option: --parts 选项的值，None 表示使用默认
+        parts_option: Value of --parts option, None means use default
 
     Returns:
-        部分名称到是否显示的映射
-        例如：{"metadata": True, "files": True, "diff": False, ...}
+        Mapping from part names to whether they should be displayed
+        Example: {"metadata": True, "files": True, "diff": False, ...}
     """
     if parts_option:
         parts_list = parse_parts_option(parts_option)
     else:
         parts_list = DEFAULT_PARTS
 
-    # 转换为字典（所有部分默认 False，指定的设为 True）
+    # Convert to dictionary (all parts default to False, specified ones set to True)
     return {part: (part in parts_list) for part in AVAILABLE_PARTS.keys()}

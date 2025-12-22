@@ -150,18 +150,18 @@ class TableFormatter(Formatter):
         show_parts: Optional[Dict[str, bool]] = None,
         context: int = 5,
     ) -> str:
-        """格式化 change 的完整视图（类似 tig show）
+        """Format complete change view (similar to tig show)
 
         Args:
-            change: ChangeDetail 对象
-            files: 文件列表数据
-            diffs: diff 数据
-            comments: 评论数据
-            show_parts: 要显示的部分，例如 {"metadata": True, "files": True, ...}
-            context: diff 上下文行数（默认: 5）
+            change: ChangeDetail object
+            files: File list data
+            diffs: Diff data
+            comments: Comments data
+            show_parts: Parts to display, e.g. {"metadata": True, "files": True, ...}
+            context: Number of diff context lines (default: 5)
 
         Returns:
-            格式化后的字符串
+            Formatted string
         """
         if show_parts is None:
             # 默认显示元数据、文件、消息（不含 diff）
@@ -205,7 +205,7 @@ class TableFormatter(Formatter):
         return capture.get()
 
     def _render_metadata_panel(self, change: ChangeDetail) -> Panel:
-        """渲染元数据 Panel"""
+        """Render metadata Panel"""
         # 标题
         title = Text()
         title.append(f"Change {change.display_id}: ", style="bold cyan")
@@ -239,7 +239,7 @@ class TableFormatter(Formatter):
         return Panel(content, title=title, title_align="left", border_style="cyan", padding=(1, 2))
 
     def _render_files_panel(self, files: dict, change: ChangeDetail) -> Panel:
-        """渲染文件列表 Panel"""
+        """Render files list Panel"""
         file_count = len([f for f in files.keys() if f not in ["/COMMIT_MSG", "/MERGE_LIST"]])
         title = f"FILES CHANGED ({file_count} files, +{change.insertions}/-{change.deletions})"
  
@@ -274,11 +274,11 @@ class TableFormatter(Formatter):
         return Panel(table, title=title, title_align="left", border_style="blue", padding=(0, 1))
 
     def _render_diffs_panel(self, diffs: dict, context: int = 5) -> Panel:
-        """渲染 diff Panel
+        """Render diff Panel
 
         Args:
-            diffs: diff 数据字典
-            context: 改动上下文行数（默认: 5）
+            diffs: Diff data dictionary
+            context: Number of context lines for changes (default: 5)
         """
         content = Text()
 
@@ -305,7 +305,7 @@ class TableFormatter(Formatter):
         return Panel(content, title="DIFF", title_align="left", border_style="green", padding=(1, 2))
 
     def _render_messages_panel(self, messages: list) -> Panel:
-        """渲染消息历史 Panel"""
+        """Render messages history Panel"""
         content = Text()
 
         # 只显示最近 8 条消息（增加一些可见度）
@@ -335,7 +335,7 @@ class TableFormatter(Formatter):
         return Panel(content, title=title, title_align="left", border_style="yellow", padding=(1, 2))
 
     def _render_comments_panel(self, comments: dict) -> Panel:
-        """渲染评论 Panel，按文件、行号和作者归并"""
+        """Render comments Panel, grouped by file, line number and author"""
         content = Text()
 
         if not comments:
@@ -409,23 +409,23 @@ class TableFormatter(Formatter):
         )
 
     def _convert_gerrit_diff_to_unified(self, gerrit_diff: dict, context: int = 5) -> str:
-        """将 Gerrit diff 格式转换为 unified diff 格式，并限制上下文行数
+        """Convert Gerrit diff format to unified diff format with limited context lines
 
-        Gerrit diff 格式：
+        Gerrit diff format:
         {
             "content": [
-                {"ab": ["context line"]},  # 上下文行
-                {"a": ["old line"], "b": ["new line"]},  # 修改的行
+                {"ab": ["context line"]},  # Context lines
+                {"a": ["old line"], "b": ["new line"]},  # Modified lines
                 ...
             ]
         }
 
         Args:
-            gerrit_diff: Gerrit diff 数据
-            context: 改动上下文行数（每一侧的行数）
+            gerrit_diff: Gerrit diff data
+            context: Number of context lines for changes (lines on each side)
 
         Returns:
-            unified diff 格式的字符串
+            Unified diff format string
         """
         lines = []
         content_sections = gerrit_diff.get("content", [])
@@ -502,7 +502,7 @@ class TableFormatter(Formatter):
         return "\n".join(lines)
 
     def _is_change_section(self, section: dict) -> bool:
-        """判断一个 section 是否包含改动（不是纯上下文）"""
+        """Check if a section contains changes (not pure context)"""
         return "a" in section or "b" in section
 
     def _format_time(self, time_str: str) -> str:

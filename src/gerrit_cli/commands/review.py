@@ -4,7 +4,7 @@ import re
 import sys
 from typing import Optional
 
-import click
+import rich_click as click
 
 from gerrit_cli.client.api import GerritClient
 from gerrit_cli.client.models import CommentInput, CommentRange, ReviewInput

@@ -3,7 +3,7 @@
 import sys
 from typing import Optional
 
-import click
+import rich_click as click
 
 from gerrit_cli.client.api import GerritClient
 from gerrit_cli.formatters import get_formatter
@@ -26,7 +26,7 @@ from gerrit_cli.utils.helpers import (
 
 @click.group()
 def change() -> None:
-    """Change related commands"""
+    """Change related commands (alias: c)"""
     pass
 
 
@@ -109,13 +109,13 @@ def list(
 @click.option(
     "--parts",
     "-p",
-    help="要显示的部分，逗号分隔。示例: 'all' 或 'm,f,msg,c'。可选值: metadata(m), files(f), diff(d), messages(msg), comments(c)。默认为 m,f,msg,c",
+    help="Parts to display, comma-separated. Examples: 'all' or 'm,f,msg,c'. Options: metadata(m), files(f), diff(d), messages(msg), comments(c). Default: m,f,msg,c",
 )
 @click.option(
     "--context",
     type=int,
     default=5,
-    help="显示 diff 时，改动部分的上下文行数（默认: 5）。设为较大值可显示更多上下文。",
+    help="Number of context lines for diff display (default: 5). Use larger values to show more context.",
 )
 @click.pass_context
 def view(
@@ -125,25 +125,25 @@ def view(
     parts: Optional[str],
     context: int,
 ) -> None:
-    """查看 Gerrit Change 详情。
+    """View Gerrit Change details.
 
     \b
-    默认显示: metadata, files, messages, comments (不含 diff)。
+    Default display: metadata, files, messages, comments (excluding diff).
 
-    可用部分 (--parts):
-    - m, metadata : 基础信息
-    - f, files    : 文件列表
-    - msg,messages: 消息历史
-    - c, comments : 详细内联评论 (按文件/行号归并)
-    - d, diff     : 代码差异
-    - all         : 显示全部
+    Available parts (--parts):
+    - m, metadata : Basic information
+    - f, files    : File list
+    - msg,messages: Message history
+    - c, comments : Detailed inline comments (grouped by file/line)
+    - d, diff     : Code diff
+    - all         : Show everything
 
-    示例:
+    Examples:
     \b
-    gerrit show 12345                # 默认视图
-    gerrit show 12345 --parts all    # 显示所有内容 (含完整 diff)
-    gerrit show 12345 -p m,f,c       # 仅查看元数据、文件和评论
-    gerrit show 12345 -p d --context 10 # 仅查看带 10 行上下文的 diff
+    gerrit view 12345                # Default view
+    gerrit view 12345 --parts all    # Show all content (including full diff)
+    gerrit view 12345 -p m,f,c       # Only view metadata, files and comments
+    gerrit view 12345 -p d --context 10 # Only view diff with 10 lines of context
     """
     from gerrit_cli.utils.show_parts import get_parts_to_show
 
@@ -174,10 +174,10 @@ def view(
 
                 if total_lines > max_lines:
                     click.echo(
-                        f"警告：diff 太大（{total_lines} 行），跳过显示。", err=True
+                        f"Warning: diff too large ({total_lines} lines), skipping display.", err=True
                     )
                     click.echo(
-                        f"提示：使用 'gerrit checkout {change_id}' 在本地查看。", err=True
+                        f"Tip: Use 'gerrit checkout {change_id}' to view locally.", err=True
                     )
                     show_parts["diff"] = False
                 else:
@@ -222,8 +222,8 @@ def view(
                 click.echo(output)
 
     except ValueError as e:
-        # --parts 选项解析错误
-        click.echo(f"错误: {e}", err=True)
+        # --parts option parsing error
+        click.echo(f"Error: {e}", err=True)
         sys.exit(1)
 
     except GerritCliError as e:
