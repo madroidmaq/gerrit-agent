@@ -1,7 +1,7 @@
 """Gerrit REST API Client"""
 
 import json
-from typing import Any
+from typing import Any, Optional, Union
 
 import httpx
 
@@ -44,7 +44,7 @@ class GerritClient:
         self.client.close()
 
     def _make_request(
-        self, method: str, endpoint: str, params: dict[str, Any] | None = None, data: Any = None
+        self, method: str, endpoint: str, params: Optional[Union[dict[str, Any], list[tuple[str, Any]]]] = None, data: Any = None
     ) -> Any:
         """Unified request handler
 
@@ -122,7 +122,7 @@ class GerritClient:
     # ==================== Changes API ====================
 
     def list_changes(
-        self, query: str = "status:open", options: list[str] | None = None, limit: int = 25
+        self, query: str = "status:open", options: Optional[list[str]] = None, limit: int = 25
     ) -> list[Change]:
         """List changes
 
@@ -134,19 +134,19 @@ class GerritClient:
         Returns:
             List of Change objects
         """
-        params: dict[str, Any] = {"q": query, "n": limit}
+        params: list[tuple[str, Any]] = [("q", query), ("n", str(limit))]
 
         # Add return options
         if options:
             for opt in options:
-                params["o"] = opt
+                params.append(("o", opt))
 
         data = self._make_request("GET", "/changes/", params=params)
 
         # Parse as Change object list
         return [Change.model_validate(item) for item in data]
 
-    def get_change(self, change_id: str, options: list[str] | None = None) -> ChangeDetail:
+    def get_change(self, change_id: str, options: Optional[list[str]] = None) -> ChangeDetail:
         """Get details of a single change
 
         Args:
@@ -156,10 +156,10 @@ class GerritClient:
         Returns:
             ChangeDetail object
         """
-        params = {}
+        params: list[tuple[str, Any]] = []
         if options:
             for opt in options:
-                params["o"] = opt
+                params.append(("o", opt))
 
         data = self._make_request("GET", f"/changes/{change_id}", params=params)
         return ChangeDetail.model_validate(data)

@@ -1,6 +1,7 @@
 """Table Formatter"""
 
 from datetime import datetime
+from typing import Optional, Dict
 
 from rich.console import Console
 from rich.table import Table
@@ -19,7 +20,7 @@ class TableFormatter(Formatter):
         self.console = Console()
 
     def format_changes(
-        self, changes: list[Change], has_more: bool = False, limit: int | None = None
+        self, changes: list[Change], has_more: bool = False, limit: Optional[int] = None
     ) -> str:
         """Format changes list as a table
 
@@ -143,10 +144,10 @@ class TableFormatter(Formatter):
     def format_change_complete(
         self,
         change: ChangeDetail,
-        files: dict | None = None,
-        diffs: dict | None = None,
-        comments: dict | None = None,
-        show_parts: dict[str, bool] | None = None,
+        files: Optional[dict] = None,
+        diffs: Optional[dict] = None,
+        comments: Optional[dict] = None,
+        show_parts: Optional[Dict[str, bool]] = None,
         context: int = 5,
     ) -> str:
         """格式化 change 的完整视图（类似 tig show）
@@ -182,17 +183,17 @@ class TableFormatter(Formatter):
         if show_parts.get("files", False) and files:
             parts.append(self._render_files_panel(files, change))
 
-        # ========== DIFF 部分 ==========
-        if show_parts.get("diff", False) and diffs:
-            parts.append(self._render_diffs_panel(diffs, context=context))
+        # ========== 评论部分 (提前到 FILES 之后) ==========
+        if show_parts.get("comments", False) and comments:
+            parts.append(self._render_comments_panel(comments))
 
         # ========== 消息历史部分 ==========
         if show_parts.get("messages", False) and change.messages:
             parts.append(self._render_messages_panel(change.messages))
 
-        # ========== 评论部分 ==========
-        if show_parts.get("comments", False) and comments:
-            parts.append(self._render_comments_panel(comments))
+        # ========== DIFF 部分 ==========
+        if show_parts.get("diff", False) and diffs:
+            parts.append(self._render_diffs_panel(diffs, context=context))
 
         # 合并所有部分
         with self.console.capture() as capture:
@@ -307,45 +308,104 @@ class TableFormatter(Formatter):
         """渲染消息历史 Panel"""
         content = Text()
 
-        # 只显示最近 5 条消息
-        recent_messages = messages[-5:] if len(messages) > 5 else messages
+        # 只显示最近 8 条消息（增加一些可见度）
+        recent_messages = messages[-8:] if len(messages) > 8 else messages
 
         for msg in recent_messages:
             author_name = msg.author.name if msg.author else "Unknown"
             time_str = self._format_time(msg.date)
 
             content.append(f"[{time_str}] ", style="dim")
-            content.append(f"{author_name}:\n", style="bold cyan")
+            content.append(f"{author_name}:", style="bold cyan")
+            
+            # 标记包含评论的消息
+            if "(1 comment)" in msg.message or " comments)" in msg.message:
+                 content.append(" 💬", style="yellow")
+            
+            content.append("\n")
 
             # 处理消息内容（可能有多行）
             for line in msg.message.split("\n"):
-                content.append(f"  {line}\n")
+                if line.strip():
+                    content.append(f"  {line}\n")
 
             content.append("\n")
 
-        title = f"RECENT MESSAGES ({len(recent_messages)})"
+        title = f"RECENT MESSAGES ({len(messages)})"
         return Panel(content, title=title, title_align="left", border_style="yellow", padding=(1, 2))
 
     def _render_comments_panel(self, comments: dict) -> Panel:
-        """渲染评论 Panel"""
+        """渲染评论 Panel，按文件、行号和作者归并"""
         content = Text()
+
+        if not comments:
+            return Panel(Text("No inline comments"), title="INLINE COMMENTS", border_style="magenta")
+
+        file_count = 0
+        comment_count = 0
+
+        # 计算可用宽度用于缩短路径
+        available_width = self.console.width - 15
+        if available_width < 20:
+            available_width = 20
 
         for file_path, comment_list in comments.items():
             if not comment_list:
                 continue
 
-            content.append(f"\n{file_path}:\n", style="bold cyan")
+            file_count += 1
+            comment_count += len(comment_list)
 
+            # 缩短文件路径，并作为文件头展示
+            display_path = shorten_path(file_path, max_length=available_width)
+            content.append(f"\n{display_path}\n", style="bold magenta underline")
+
+            # 按行号对评论进行预分组
+            line_groups = {}
             for comment in comment_list:
-                author = comment.author.name if comment.author else "Unknown"
-                line = comment.line if comment.line else "?"
+                line = comment.line if comment.line else "File"
+                if line not in line_groups:
+                    line_groups[line] = []
+                line_groups[line].append(comment)
 
-                content.append(f"  Line {line} - ", style="dim")
-                content.append(f"{author}: ", style="bold")
-                content.append(f"{comment.message}\n")
+            # 按行号排序并展示
+            sorted_lines = sorted(
+                line_groups.keys(),
+                key=lambda x: (0, int(x)) if isinstance(x, int) or (isinstance(x, str) and x.isdigit()) else (1, x)
+            )
 
+            for line in sorted_lines:
+                # 行号标题（缩进一层）
+                line_text = f"Line {line}" if isinstance(line, int) or str(line).isdigit() else line
+                content.append(f"  {line_text}:\n", style="bold yellow")
+
+                # 在该行内按作者归并
+                author_groups = {}
+                for comment in line_groups[line]:
+                    author = comment.author.name if comment.author else "Unknown"
+                    if author not in author_groups:
+                        author_groups[author] = []
+                    author_groups[author].append(comment)
+
+                for author, author_comments in author_groups.items():
+                    # 取最后一条评论的时间
+                    last_updated = author_comments[-1].updated
+                    time_str = f" [{self._format_time(last_updated)}]" if last_updated else ""
+
+                    # 展示作者（缩进两层）
+                    content.append(f"    {author}{time_str}:\n", style="bold cyan")
+
+                    # 展示该作者的所有评论内容（缩进三层）
+                    for comment in author_comments:
+                        lines = comment.message.split("\n")
+                        for i, l in enumerate(lines):
+                            if l.strip() or i < len(lines) - 1:
+                                content.append(f"      {l}\n")
+                    content.append("\n")
+
+        title = f"INLINE COMMENTS ({comment_count} comments in {file_count} files)"
         return Panel(
-            content, title="INLINE COMMENTS", title_align="left", border_style="magenta", padding=(1, 2)
+            content, title=title, title_align="left", border_style="magenta", padding=(1, 2)
         )
 
     def _convert_gerrit_diff_to_unified(self, gerrit_diff: dict, context: int = 5) -> str:

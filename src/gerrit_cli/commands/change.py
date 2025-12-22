@@ -1,6 +1,7 @@
 """Change Command Group"""
 
 import sys
+from typing import Optional
 
 import click
 
@@ -46,8 +47,8 @@ def list(
     ctx: click.Context,
     query: str,
     limit: int,
-    owner: str | None,
-    project: str | None,
+    owner: Optional[str],
+    project: Optional[str],
     output_format: str,
 ) -> None:
     """List changes
@@ -107,11 +108,8 @@ def list(
 )
 @click.option(
     "--parts",
-    help=(
-        "指定显示的部分（逗号分隔）。"
-        "可用: metadata(m), files(f), diff(d), messages(msg), comments(c), all。"
-        "默认: m,f,msg"
-    ),
+    "-p",
+    help="要显示的部分，逗号分隔。示例: 'all' 或 'm,f,msg,c'。可选值: metadata(m), files(f), diff(d), messages(msg), comments(c)。默认为 m,f,msg,c",
 )
 @click.option(
     "--context",
@@ -124,42 +122,28 @@ def view(
     ctx: click.Context,
     change_id: str,
     output_format: str,
-    parts: str | None,
+    parts: Optional[str],
     context: int,
 ) -> None:
-    """查看 change 的详细信息
+    """查看 Gerrit Change 详情。
 
-    默认显示：元数据 + 文件列表 + 消息历史（不含 diff，更快）
+    \b
+    默认显示: metadata, files, messages, comments (不含 diff)。
 
-    CHANGE_ID 可以是数字 ID 或 Change-Id
+    可用部分 (--parts):
+    - m, metadata : 基础信息
+    - f, files    : 文件列表
+    - msg,messages: 消息历史
+    - c, comments : 详细内联评论 (按文件/行号归并)
+    - d, diff     : 代码差异
+    - all         : 显示全部
 
-    示例：
-        # 默认显示（元数据 + 文件 + 消息）
-        gerrit show 12345
-
-        # 包含 diff（默认显示改动上下 5 行）
-        gerrit show 12345 --parts m,f,d
-
-        # 包含 diff，只显示改动上下 3 行
-        gerrit show 12345 --parts diff --context 3
-
-        # 只显示代码差异
-        gerrit show 12345 --parts diff
-        gerrit show 12345 --parts d
-
-        # 显示所有
-        gerrit show 12345 --parts all
-
-        # 自定义组合
-        gerrit show 12345 --parts metadata,diff,comments
-
-    可用部分：
-        metadata (m)   - 基本信息、Owner、Status、Labels
-        files (f)      - 文件列表及统计信息
-        diff (d)       - 代码差异
-        messages (msg) - 消息历史
-        comments (c)   - 内联评论
-        all            - 所有部分
+    示例:
+    \b
+    gerrit show 12345                # 默认视图
+    gerrit show 12345 --parts all    # 显示所有内容 (含完整 diff)
+    gerrit show 12345 -p m,f,c       # 仅查看元数据、文件和评论
+    gerrit show 12345 -p d --context 10 # 仅查看带 10 行上下文的 diff
     """
     from gerrit_cli.utils.show_parts import get_parts_to_show
 
@@ -252,8 +236,8 @@ def view(
 def comment(
     ctx: click.Context,
     change_id: str,
-    message: str | None,
-    file_path: str | None,
+    message: Optional[str],
+    file_path: Optional[str],
     draft: bool,
 ) -> None:
     """Add comment to change
@@ -307,10 +291,10 @@ def comment(
 def checkout(
     ctx: click.Context,
     change_id: str,
-    branch: str | None,
+    branch: Optional[str],
     force: bool,
     no_checkout: bool,
-    stash: bool | None,
+    stash: Optional[bool],
 ) -> None:
     """Checkout change to local branch
 

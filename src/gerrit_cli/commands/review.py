@@ -2,6 +2,7 @@
 
 import re
 import sys
+from typing import Optional
 
 import click
 
@@ -36,10 +37,10 @@ from gerrit_cli.utils.exceptions import GerritCliError
 def review(
     ctx: click.Context,
     change_id: str,
-    message: str | None,
-    code_review: str | None,
-    verified: str | None,
-    file_path: str | None,
+    message: Optional[str],
+    code_review: Optional[str],
+    verified: Optional[str],
+    file_path: Optional[str],
     inline_comment: list[tuple[str, str]],
     submit: bool,
 ) -> None:
@@ -96,7 +97,7 @@ def review(
 
             # Parse line or range
             line: int
-            comment_range: CommentRange | None = None
+            comment_range: Optional[CommentRange] = None
 
             # Check for character range: L12C13-L12C19 (case insensitive)
             char_range_match = re.match(r"^L(\d+)C(\d+)-L(\d+)C(\d+)$", l_raw, re.IGNORECASE)

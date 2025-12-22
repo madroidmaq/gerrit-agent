@@ -1,6 +1,7 @@
 """JSON Formatter"""
 
 import json
+from typing import Optional
 
 from gerrit_cli.client.models import Change, ChangeDetail
 from gerrit_cli.formatters.base import Formatter
@@ -10,7 +11,7 @@ class JsonFormatter(Formatter):
     """JSON formatter"""
 
     def format_changes(
-        self, changes: list[Change], has_more: bool = False, limit: int | None = None
+        self, changes: list[Change], has_more: bool = False, limit: Optional[int] = None
     ) -> str:
         """Format changes list as JSON
 

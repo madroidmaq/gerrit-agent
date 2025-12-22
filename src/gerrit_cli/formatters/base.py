@@ -1,6 +1,7 @@
 """Formatter Base Class"""
 
 from abc import ABC, abstractmethod
+from typing import Optional
 
 from gerrit_cli.client.models import Change, ChangeDetail
 
@@ -10,7 +11,7 @@ class Formatter(ABC):
 
     @abstractmethod
     def format_changes(
-        self, changes: list[Change], has_more: bool = False, limit: int | None = None
+        self, changes: list[Change], has_more: bool = False, limit: Optional[int] = None
     ) -> str:
         """Format changes list
 

@@ -1,5 +1,7 @@
 """gerrit show 命令的部分显示工具"""
 
+from typing import Optional
+
 # 可用部分及其缩写
 AVAILABLE_PARTS = {
     "metadata": "m",
@@ -10,7 +12,7 @@ AVAILABLE_PARTS = {
 }
 
 # 默认显示的部分（不含 diff，加快速度）
-DEFAULT_PARTS = ["metadata", "files", "messages"]
+DEFAULT_PARTS = ["metadata", "files", "messages", "comments"]
 
 
 def parse_parts_option(parts_str: str) -> list[str]:
@@ -74,7 +76,7 @@ def parse_parts_option(parts_str: str) -> list[str]:
     return parts
 
 
-def get_parts_to_show(parts_option: str | None = None) -> dict[str, bool]:
+def get_parts_to_show(parts_option: Optional[str] = None) -> dict[str, bool]:
     """获取要显示的部分
 
     Args:

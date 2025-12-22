@@ -1,6 +1,6 @@
 """Gerrit API Data Models"""
 
-from typing import Any
+from typing import Any, List, Optional, Union, Dict
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -11,9 +11,9 @@ class Account(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
     account_id: int = Field(alias="_account_id")
-    name: str | None = None
-    email: str | None = None
-    username: str | None = None
+    name: Optional[str] = None
+    email: Optional[str] = None
+    username: Optional[str] = None
 
 
 class Change(BaseModel):
@@ -32,9 +32,9 @@ class Change(BaseModel):
     insertions: int = 0
     deletions: int = 0
     number: int = Field(alias="_number")
-    owner: Account | None = None
-    current_revision: str | None = None
-    more_changes: bool | None = Field(default=None, alias="_more_changes")
+    owner: Optional[Account] = None
+    current_revision: Optional[str] = None
+    more_changes: Optional[bool] = Field(default=None, alias="_more_changes")
 
     @property
     def display_id(self) -> str:
@@ -45,62 +45,62 @@ class Change(BaseModel):
 class LabelInfo(BaseModel):
     """Label Info"""
 
-    approved: Account | None = None
-    rejected: Account | None = None
-    recommended: Account | None = None
-    disliked: Account | None = None
-    value: int | None = None
-    default_value: int | None = None
-    values: dict[str, str] | None = None
-    all: list[dict[str, Any]] | None = None
+    approved: Optional[Account] = None
+    rejected: Optional[Account] = None
+    recommended: Optional[Account] = None
+    disliked: Optional[Account] = None
+    value: Optional[int] = None
+    default_value: Optional[int] = None
+    values: Optional[dict[str, str]] = None
+    all: Optional[list[dict[str, Any]]] = None
 
 
 class MessageInfo(BaseModel):
     """Message Info"""
 
     id: str
-    author: Account | None = None
+    author: Optional[Account] = None
     date: str
     message: str
-    tag: str | None = None
+    tag: Optional[str] = None
 
 
 class FileInfo(BaseModel):
     """File Info"""
 
-    status: str | None = None
-    binary: bool | None = None
-    old_path: str | None = None
-    lines_inserted: int | None = None
-    lines_deleted: int | None = None
-    size_delta: int | None = None
-    size: int | None = None
+    status: Optional[str] = None
+    binary: Optional[bool] = None
+    old_path: Optional[str] = None
+    lines_inserted: Optional[int] = None
+    lines_deleted: Optional[int] = None
+    size_delta: Optional[int] = None
+    size: Optional[int] = None
 
 
 class ChangeDetail(Change):
     """Change Detail"""
 
-    messages: list[MessageInfo] | None = None
-    labels: dict[str, LabelInfo] | None = None
-    permitted_labels: dict[str, list[str]] | None = None
-    reviewers: dict[str, list[Account]] | None = None
-    revisions: dict[str, Any] | None = None
+    messages: Optional[list[MessageInfo]] = None
+    labels: Optional[dict[str, LabelInfo]] = None
+    permitted_labels: Optional[dict[str, list[str]]] = None
+    reviewers: Optional[dict[str, list[Account]]] = None
+    revisions: Optional[dict[str, Any]] = None
 
 
 class CommentInfo(BaseModel):
     """Comment Info"""
 
-    id: str | None = None
-    patch_set: int | None = None
-    path: str | None = None
-    side: str | None = None
-    line: int | None = None
-    range: dict[str, Any] | None = None
+    id: Optional[str] = None
+    patch_set: Optional[int] = None
+    path: Optional[str] = None
+    side: Optional[str] = None
+    line: Optional[int] = None
+    range: Optional[dict[str, Any]] = None
     message: str
-    updated: str | None = None
-    author: Account | None = None
-    unresolved: bool | None = None
-    in_reply_to: str | None = None
+    updated: Optional[str] = None
+    author: Optional[Account] = None
+    unresolved: Optional[bool] = None
+    in_reply_to: Optional[str] = None
 
 
 
@@ -116,31 +116,31 @@ class CommentRange(BaseModel):
 class CommentInput(BaseModel):
     """Comment Input"""
 
-    path: str | None = None
-    line: int | None = None
-    range: CommentRange | None = None
+    path: Optional[str] = None
+    line: Optional[int] = None
+    range: Optional[CommentRange] = None
     message: str
     side: str = "REVISION"
-    in_reply_to: str | None = None
-    unresolved: bool | None = None
+    in_reply_to: Optional[str] = None
+    unresolved: Optional[bool] = None
 
 
 class ReviewInput(BaseModel):
     """Review Request Input"""
 
-    message: str | None = None
-    labels: dict[str, int] | None = None
-    comments: dict[str, list[CommentInput]] | None = None
-    tag: str | None = None
-    notify: str | None = None
-    drafts: str | None = None
-    ready: bool | None = None
-    work_in_progress: bool | None = None
+    message: Optional[str] = None
+    labels: Optional[dict[str, int]] = None
+    comments: Optional[dict[str, list[CommentInput]]] = None
+    tag: Optional[str] = None
+    notify: Optional[str] = None
+    drafts: Optional[str] = None
+    ready: Optional[bool] = None
+    work_in_progress: Optional[bool] = None
 
 
 class ReviewResult(BaseModel):
     """Review Response Result"""
 
-    labels: dict[str, int] | None = None
-    reviewers: dict[str, Any] | None = None
-    ready: bool | None = None
+    labels: Optional[dict[str, int]] = None
+    reviewers: Optional[dict[str, Any]] = None
+    ready: Optional[bool] = None

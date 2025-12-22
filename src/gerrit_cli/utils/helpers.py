@@ -1,6 +1,7 @@
 """Helper Functions"""
 
 import subprocess
+from typing import Optional, Tuple, Union
 
 
 class GitOperationError(Exception):
@@ -9,7 +10,7 @@ class GitOperationError(Exception):
     pass
 
 
-def run_git_command(command: list[str], cwd: str | None = None) -> tuple[bool, str]:
+def run_git_command(command: list[str], cwd: Optional[str] = None) -> Tuple[bool, str]:
     """Run Git Command
 
     Args:
@@ -45,7 +46,7 @@ def check_git_repository(path: str = ".") -> bool:
     return success
 
 
-def get_current_branch() -> str | None:
+def get_current_branch() -> Optional[str]:
     """Get current Git branch name
 
     Returns:
@@ -57,7 +58,7 @@ def get_current_branch() -> str | None:
     return None
 
 
-def check_working_directory_clean() -> tuple[bool, str]:
+def check_working_directory_clean() -> Tuple[bool, str]:
     """Check if working directory is clean (no uncommitted changes)
 
     Returns:
@@ -87,7 +88,7 @@ def check_working_directory_clean() -> tuple[bool, str]:
     return False, ", ".join(status_parts)
 
 
-def stash_changes(include_untracked: bool = True) -> tuple[bool, str]:
+def stash_changes(include_untracked: bool = True) -> Tuple[bool, str]:
     """Stash current changes
 
     Args:
@@ -106,7 +107,7 @@ def stash_changes(include_untracked: bool = True) -> tuple[bool, str]:
     return False, f"Stash failed: {output}"
 
 
-def pop_stash() -> tuple[bool, str]:
+def pop_stash() -> Tuple[bool, str]:
     """Pop latest stash
 
     Returns:
@@ -118,7 +119,7 @@ def pop_stash() -> tuple[bool, str]:
     return False, f"Stash pop failed: {output}"
 
 
-def fetch_change_ref(change_number: str, ref_spec: str) -> tuple[bool, str]:
+def fetch_change_ref(change_number: str, ref_spec: str) -> Tuple[bool, str]:
     """Fetch change ref from Gerrit
 
     Args:
@@ -134,7 +135,7 @@ def fetch_change_ref(change_number: str, ref_spec: str) -> tuple[bool, str]:
     return False, f"Fetch failed: {output}"
 
 
-def checkout_branch(branch_name: str, create: bool = True) -> tuple[bool, str]:
+def checkout_branch(branch_name: str, create: bool = True) -> Tuple[bool, str]:
     """Checkout branch
 
     Args:
@@ -155,7 +156,7 @@ def checkout_branch(branch_name: str, create: bool = True) -> tuple[bool, str]:
     return False, f"Failed to checkout branch: {output}"
 
 
-def checkout_fetch_head() -> tuple[bool, str]:
+def checkout_fetch_head() -> Tuple[bool, str]:
     """Checkout FETCH_HEAD
 
     Returns:
@@ -180,7 +181,7 @@ def branch_exists(branch_name: str) -> bool:
     return success
 
 
-def delete_branch(branch_name: str, force: bool = False) -> tuple[bool, str]:
+def delete_branch(branch_name: str, force: bool = False) -> Tuple[bool, str]:
     """Delete branch
 
     Args:
@@ -197,7 +198,7 @@ def delete_branch(branch_name: str, force: bool = False) -> tuple[bool, str]:
     return False, f"Failed to delete branch: {output}"
 
 
-def get_git_remote_url(remote_name: str = "origin") -> str | None:
+def get_git_remote_url(remote_name: str = "origin") -> Optional[str]:
     """Get Git remote URL
 
     Args:
@@ -212,7 +213,7 @@ def get_git_remote_url(remote_name: str = "origin") -> str | None:
     return None
 
 
-def get_repo_root() -> str | None:
+def get_repo_root() -> Optional[str]:
     """Get Git repository root directory
 
     Returns:

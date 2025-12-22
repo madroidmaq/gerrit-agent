@@ -1,5 +1,7 @@
 """Custom exceptions"""
 
+from typing import Optional
+
 
 class GerritCliError(Exception):
     """Base CLI exception"""
@@ -16,7 +18,7 @@ class ConfigError(GerritCliError):
 class ApiError(GerritCliError):
     """API request error"""
 
-    def __init__(self, message: str, status_code: int | None = None) -> None:
+    def __init__(self, message: str, status_code: Optional[int] = None) -> None:
         self.status_code = status_code
         super().__init__(message)
 

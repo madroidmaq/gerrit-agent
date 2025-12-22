@@ -109,8 +109,13 @@ gerrit show 12345
 # View change details (using Change-Id)
 gerrit show I1234567890abcdef
 
-# Show comments
-gerrit show 12345 --comments
+# Show specific parts (metadata, files, messages, comments, diff)
+# Default is m,f,msg,c
+gerrit show 12345 --parts all
+gerrit show 12345 -p m,f,c
+
+# View details with full diff
+gerrit show 12345 -p all
 
 # JSON format output
 gerrit show 12345 --format json
