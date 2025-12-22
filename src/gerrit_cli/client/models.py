@@ -34,6 +34,7 @@ class Change(BaseModel):
     number: int = Field(alias="_number")
     owner: Account | None = None
     current_revision: str | None = None
+    more_changes: bool | None = Field(default=None, alias="_more_changes")
 
     @property
     def display_id(self) -> str:

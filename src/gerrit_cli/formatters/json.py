@@ -9,7 +9,9 @@ from gerrit_cli.formatters.base import Formatter
 class JsonFormatter(Formatter):
     """JSON formatter"""
 
-    def format_changes(self, changes: list[Change]) -> str:
+    def format_changes(
+        self, changes: list[Change], has_more: bool = False, limit: int | None = None
+    ) -> str:
         """Format changes list as JSON
 
         Args:

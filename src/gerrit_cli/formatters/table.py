@@ -9,6 +9,7 @@ from rich.text import Text
 
 from gerrit_cli.client.models import Change, ChangeDetail
 from gerrit_cli.formatters.base import Formatter
+from gerrit_cli.utils.helpers import shorten_path
 
 
 class TableFormatter(Formatter):
@@ -17,7 +18,9 @@ class TableFormatter(Formatter):
     def __init__(self) -> None:
         self.console = Console()
 
-    def format_changes(self, changes: list[Change]) -> str:
+    def format_changes(
+        self, changes: list[Change], has_more: bool = False, limit: int | None = None
+    ) -> str:
         """Format changes list as a table
 
         Args:
@@ -29,7 +32,14 @@ class TableFormatter(Formatter):
         if not changes:
             return "No changes found"
 
-        table = Table(title=f"Changes ({len(changes)} items)")
+        # Build title
+        title = f"Changes ({len(changes)} items)"
+        if has_more:
+            title += " [yellow](more available)[/yellow]"
+        if limit:
+            title += f" (limit: {limit})"
+ 
+        table = Table(title=title)
         table.add_column("ID", style="cyan", no_wrap=True)
         table.add_column("Subject", style="white")
         table.add_column("Owner", style="green")
@@ -101,7 +111,9 @@ class TableFormatter(Formatter):
                 label_text.append(f"{label_name}: {value:+d}")
             info_lines.append(f"Labels: {', '.join(label_text)}")
 
-        info_panel = Panel("\n".join(info_lines), title="Basic Info", border_style="cyan")
+        info_panel = Panel(
+            "\n".join(info_lines), title="Basic Info", title_align="left", border_style="cyan"
+        )
 
         # Message History
         messages_text = []
@@ -119,7 +131,10 @@ class TableFormatter(Formatter):
 
             if messages_text:
                 messages_panel = Panel(
-                    "\n\n".join(messages_text), title="Recent Messages", border_style="yellow"
+                    "\n\n".join(messages_text),
+                    title="Recent Messages",
+                    title_align="left",
+                    border_style="yellow",
                 )
                 self.console.print(messages_panel)
 
@@ -132,6 +147,7 @@ class TableFormatter(Formatter):
         diffs: dict | None = None,
         comments: dict | None = None,
         show_parts: dict[str, bool] | None = None,
+        context: int = 5,
     ) -> str:
         """格式化 change 的完整视图（类似 tig show）
 
@@ -141,6 +157,7 @@ class TableFormatter(Formatter):
             diffs: diff 数据
             comments: 评论数据
             show_parts: 要显示的部分，例如 {"metadata": True, "files": True, ...}
+            context: diff 上下文行数（默认: 5）
 
         Returns:
             格式化后的字符串
@@ -167,7 +184,7 @@ class TableFormatter(Formatter):
 
         # ========== DIFF 部分 ==========
         if show_parts.get("diff", False) and diffs:
-            parts.append(self._render_diffs_panel(diffs))
+            parts.append(self._render_diffs_panel(diffs, context=context))
 
         # ========== 消息历史部分 ==========
         if show_parts.get("messages", False) and change.messages:
@@ -218,37 +235,50 @@ class TableFormatter(Formatter):
                 content.append(f"  • {label_name}: ", style="white")
                 content.append(f"{value:+d}\n", style=color)
 
-        return Panel(content, title=title, border_style="cyan", padding=(1, 2))
+        return Panel(content, title=title, title_align="left", border_style="cyan", padding=(1, 2))
 
     def _render_files_panel(self, files: dict, change: ChangeDetail) -> Panel:
         """渲染文件列表 Panel"""
         file_count = len([f for f in files.keys() if f not in ["/COMMIT_MSG", "/MERGE_LIST"]])
         title = f"FILES CHANGED ({file_count} files, +{change.insertions}/-{change.deletions})"
-
+ 
+        # Calculate available width for the file path
+        # Console width - borders/padding (4) - Status (3) - Changes (15) - spacings
+        # Default Console width is 80 if not detectable
+        available_width = self.console.width - 26
+        if available_width < 20:
+            available_width = 20  # Minimum safeguard
+ 
         # 创建表格
         table = Table(show_header=False, box=None, padding=(0, 1))
         table.add_column("Status", style="yellow", width=3)
-        table.add_column("File", style="cyan")
+        table.add_column("File", style="cyan", no_wrap=True)
         table.add_column("Changes", style="blue", justify="right", width=15)
-
+ 
         for file_path, file_info in files.items():
             # 跳过特殊文件
             if file_path in ["/COMMIT_MSG", "/MERGE_LIST"]:
                 continue
-
+ 
             # 文件状态
             status = file_info.get("status", "M")
             insertions = file_info.get("lines_inserted", 0)
             deletions = file_info.get("lines_deleted", 0)
-
+ 
             changes_str = f"+{insertions} -{deletions}"
+ 
+            display_path = shorten_path(file_path, max_length=available_width)
+            table.add_row(status, display_path, changes_str)
+ 
+        return Panel(table, title=title, title_align="left", border_style="blue", padding=(0, 1))
 
-            table.add_row(status, file_path, changes_str)
+    def _render_diffs_panel(self, diffs: dict, context: int = 5) -> Panel:
+        """渲染 diff Panel
 
-        return Panel(table, title=title, border_style="blue", padding=(0, 1))
-
-    def _render_diffs_panel(self, diffs: dict) -> Panel:
-        """渲染 diff Panel"""
+        Args:
+            diffs: diff 数据字典
+            context: 改动上下文行数（默认: 5）
+        """
         content = Text()
 
         for file_path, diff_data in diffs.items():
@@ -257,8 +287,8 @@ class TableFormatter(Formatter):
             content.append(f"diff --git a/{file_path} b/{file_path}\n", style="bold white")
             content.append(f"{'=' * 80}\n", style="dim")
 
-            # 转换 Gerrit diff 为 unified diff 格式
-            unified_diff = self._convert_gerrit_diff_to_unified(diff_data)
+            # 转换 Gerrit diff 为 unified diff 格式，限制上下文行数
+            unified_diff = self._convert_gerrit_diff_to_unified(diff_data, context=context)
 
             # 语法高亮显示 diff
             for line in unified_diff.split("\n"):
@@ -271,7 +301,7 @@ class TableFormatter(Formatter):
                 else:
                     content.append(line + "\n", style="white")
 
-        return Panel(content, title="DIFF", border_style="green", padding=(1, 2))
+        return Panel(content, title="DIFF", title_align="left", border_style="green", padding=(1, 2))
 
     def _render_messages_panel(self, messages: list) -> Panel:
         """渲染消息历史 Panel"""
@@ -294,7 +324,7 @@ class TableFormatter(Formatter):
             content.append("\n")
 
         title = f"RECENT MESSAGES ({len(recent_messages)})"
-        return Panel(content, title=title, border_style="yellow", padding=(1, 2))
+        return Panel(content, title=title, title_align="left", border_style="yellow", padding=(1, 2))
 
     def _render_comments_panel(self, comments: dict) -> Panel:
         """渲染评论 Panel"""
@@ -314,10 +344,12 @@ class TableFormatter(Formatter):
                 content.append(f"{author}: ", style="bold")
                 content.append(f"{comment.message}\n")
 
-        return Panel(content, title="INLINE COMMENTS", border_style="magenta", padding=(1, 2))
+        return Panel(
+            content, title="INLINE COMMENTS", title_align="left", border_style="magenta", padding=(1, 2)
+        )
 
-    def _convert_gerrit_diff_to_unified(self, gerrit_diff: dict) -> str:
-        """将 Gerrit diff 格式转换为 unified diff 格式
+    def _convert_gerrit_diff_to_unified(self, gerrit_diff: dict, context: int = 5) -> str:
+        """将 Gerrit diff 格式转换为 unified diff 格式，并限制上下文行数
 
         Gerrit diff 格式：
         {
@@ -327,14 +359,71 @@ class TableFormatter(Formatter):
                 ...
             ]
         }
+
+        Args:
+            gerrit_diff: Gerrit diff 数据
+            context: 改动上下文行数（每一侧的行数）
+
+        Returns:
+            unified diff 格式的字符串
         """
         lines = []
+        content_sections = gerrit_diff.get("content", [])
 
-        for section in gerrit_diff.get("content", []):
+        for i, section in enumerate(content_sections):
             if "ab" in section:
                 # 上下文行（未修改）
-                for line in section["ab"]:
-                    lines.append(f" {line}")
+                ab_lines = section["ab"]
+                total_lines = len(ab_lines)
+
+                # 判断这个 ab section 的位置：是否在改动前后
+                is_before_change = i < len(content_sections) - 1 and self._is_change_section(
+                    content_sections[i + 1]
+                )
+                is_after_change = i > 0 and self._is_change_section(content_sections[i - 1])
+
+                if is_before_change and is_after_change:
+                    # 在两个改动之间：显示前一个改动的后 context 行 + 后一个改动的前 context 行
+                    if total_lines > context * 2:
+                        # 只保留前 context 行和后 context 行
+                        for line in ab_lines[:context]:
+                            lines.append(f" {line}")
+                        lines.append(f"@@ ... skipped {total_lines - context * 2} lines ... @@")
+                        for line in ab_lines[-context:]:
+                            lines.append(f" {line}")
+                    else:
+                        # 全部显示
+                        for line in ab_lines:
+                            lines.append(f" {line}")
+                elif is_before_change:
+                    # 在改动之前：只显示最后 context 行
+                    if total_lines > context:
+                        lines.append(f"@@ ... skipped {total_lines - context} lines ... @@")
+                        for line in ab_lines[-context:]:
+                            lines.append(f" {line}")
+                    else:
+                        for line in ab_lines:
+                            lines.append(f" {line}")
+                elif is_after_change:
+                    # 在改动之后：只显示前 context 行
+                    if total_lines > context:
+                        for line in ab_lines[:context]:
+                            lines.append(f" {line}")
+                        lines.append(f"@@ ... skipped {total_lines - context} lines ... @@")
+                    else:
+                        for line in ab_lines:
+                            lines.append(f" {line}")
+                else:
+                    # 孤立的 ab section（不在任何改动附近）：完全跳过或显示部分
+                    if total_lines > context * 2:
+                        lines.append(f"@@ ... skipped {total_lines} lines ... @@")
+                    else:
+                        for line in ab_lines:
+                            lines.append(f" {line}")
+
+            elif "skip" in section:
+                # Gerrit 已经提供的跳过信息
+                lines.append(f"@@ ... skipped {section['skip']} lines ... @@")
             elif "a" in section and "b" in section:
                 # 修改的行（先删除后添加）
                 for line in section["a"]:
@@ -351,6 +440,10 @@ class TableFormatter(Formatter):
                     lines.append(f"+{line}")
 
         return "\n".join(lines)
+
+    def _is_change_section(self, section: dict) -> bool:
+        """判断一个 section 是否包含改动（不是纯上下文）"""
+        return "a" in section or "b" in section
 
     def _format_time(self, time_str: str) -> str:
         """Format time string

@@ -9,7 +9,9 @@ class Formatter(ABC):
     """Abstract base class for formatters"""
 
     @abstractmethod
-    def format_changes(self, changes: list[Change]) -> str:
+    def format_changes(
+        self, changes: list[Change], has_more: bool = False, limit: int | None = None
+    ) -> str:
         """Format changes list
 
         Args:

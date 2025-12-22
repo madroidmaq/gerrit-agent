@@ -81,9 +81,14 @@ def list(
                 query=final_query, options=["CURRENT_REVISION", "LABELS", "DETAILED_ACCOUNTS"], limit=limit
             )
 
+        # Check if more available (Gerrit sets _more_changes on the last item)
+        has_more = False
+        if changes and changes[-1].more_changes:
+            has_more = True
+ 
         # Format output
         formatter = get_formatter(output_format)
-        output = formatter.format_changes(changes)
+        output = formatter.format_changes(changes, has_more=has_more, limit=limit)
         click.echo(output)
 
     except GerritCliError as e:
@@ -108,12 +113,19 @@ def list(
         "默认: m,f,msg"
     ),
 )
+@click.option(
+    "--context",
+    type=int,
+    default=5,
+    help="显示 diff 时，改动部分的上下文行数（默认: 5）。设为较大值可显示更多上下文。",
+)
 @click.pass_context
 def view(
     ctx: click.Context,
     change_id: str,
     output_format: str,
     parts: str | None,
+    context: int,
 ) -> None:
     """查看 change 的详细信息
 
@@ -125,8 +137,11 @@ def view(
         # 默认显示（元数据 + 文件 + 消息）
         gerrit show 12345
 
-        # 包含 diff
+        # 包含 diff（默认显示改动上下 5 行）
         gerrit show 12345 --parts m,f,d
+
+        # 包含 diff，只显示改动上下 3 行
+        gerrit show 12345 --parts diff --context 3
 
         # 只显示代码差异
         gerrit show 12345 --parts diff
@@ -182,7 +197,7 @@ def view(
                     )
                     show_parts["diff"] = False
                 else:
-                    diffs_data = client.get_all_diffs(change_id)
+                    diffs_data = client.get_all_diffs(change_id, context=context)
 
             # 获取评论（如果需要）
             if show_parts["comments"]:
@@ -214,6 +229,7 @@ def view(
                     diffs=diffs_data,
                     comments=comments_data,
                     show_parts=show_parts,
+                    context=context,
                 )
                 click.echo(output)
 

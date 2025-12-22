@@ -254,7 +254,7 @@ class GerritClient:
         return data
 
     def get_file_diff(
-        self, change_id: str, file_path: str, revision_id: str = "current"
+        self, change_id: str, file_path: str, revision_id: str = "current", context: int = 5
     ) -> dict[str, Any]:
         """Get diff for a specific file
 
@@ -262,6 +262,7 @@ class GerritClient:
             change_id: Change ID
             file_path: File path
             revision_id: Revision ID (default: "current")
+            context: Number of context lines (default: 5)
 
         Returns:
             Diff data in Gerrit format
@@ -270,12 +271,17 @@ class GerritClient:
 
         # URL encode the file path
         encoded_path = quote(file_path, safe="")
+        params = {"context": context}
         data = self._make_request(
-            "GET", f"/changes/{change_id}/revisions/{revision_id}/files/{encoded_path}/diff"
+            "GET",
+            f"/changes/{change_id}/revisions/{revision_id}/files/{encoded_path}/diff",
+            params=params,
         )
         return data
 
-    def get_all_diffs(self, change_id: str, revision_id: str = "current") -> dict[str, Any]:
+    def get_all_diffs(
+        self, change_id: str, revision_id: str = "current", context: int = 5
+    ) -> dict[str, Any]:
         """Get diffs for all files in a change
 
         Args:
@@ -294,7 +300,9 @@ class GerritClient:
                 continue
 
             try:
-                diffs[file_path] = self.get_file_diff(change_id, file_path, revision_id)
+                diffs[file_path] = self.get_file_diff(
+                    change_id, file_path, revision_id, context=context
+                )
             except (ApiError, NotFoundError):
                 # Some files might not have diffs (e.g., binary files)
                 continue

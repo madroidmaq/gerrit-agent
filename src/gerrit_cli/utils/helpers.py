@@ -238,3 +238,56 @@ def check_remote_exists(remote_name: str = "origin") -> bool:
         remotes = output.strip().split("\n")
         return remote_name in remotes
     return False
+
+
+def shorten_path(path: str, max_length: int = 60) -> str:
+    """Shorten a file path by truncating or compressing.
+
+    Tiered Strategies:
+    1. Middle Truncation: 'first/part/.../filename.kt'
+    2. Directory Compression: 'f/p/intermediate/filename.kt'
+    3. Filename Only: '.../filename.kt'
+    4. Filename Truncation: '...name.kt'
+    """
+    if len(path) <= max_length:
+        return path
+
+    if max_length < 5:
+        return f"...{path[-(max_length-3):]}" if max_length > 3 else "..."
+
+    parts = path.split("/")
+    first = parts[0]
+    last = parts[-1]
+
+    # Tier 1: Middle Truncation "first/.../last" (at least 3 parts)
+    if len(parts) >= 3:
+        fixed_parts_len = len(first) + 5 + len(last)  # 5 for "/.../"
+        if fixed_parts_len <= max_length:
+            remaining = max_length - fixed_parts_len
+            middle_parts = []
+            curr_len = 0
+            for p in reversed(parts[1:-1]):
+                if curr_len + len(p) + 1 <= remaining:
+                    middle_parts.insert(0, p)
+                    curr_len += len(p) + 1
+                else:
+                    break
+            if middle_parts:
+                return f"{first}/.../{'/'.join(middle_parts)}/{last}"
+            else:
+                return f"{first}/.../{last}"
+
+    # Tier 2: Directory Compression "f/p/intermediate/last"
+    if len(parts) >= 2:
+        # Keep last part, compress others to 1 char + /
+        compressed_parts = [p[0] for p in parts[:-1]]
+        compressed_prefix = "/".join(compressed_parts) + "/"
+        if len(compressed_prefix) + len(last) <= max_length:
+            return f"{compressed_prefix}{last}"
+
+    # Tier 3: Filename Only ".../last"
+    if len(last) + 4 <= max_length:
+        return f".../{last}"
+
+    # Tier 4: Filename Truncation "...last"
+    return f"...{last[-(max_length-3):]}"
