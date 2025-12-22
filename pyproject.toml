@@ -36,7 +36,6 @@ classifiers = [
     "Operating System :: OS Independent",
     "Environment :: Console",
     "Topic :: Software Development :: Version Control :: Git",
-    "Topic :: Software Development :: Code Review",
     "Topic :: Software Development :: Quality Assurance",
     "Topic :: Utilities",
 ]
