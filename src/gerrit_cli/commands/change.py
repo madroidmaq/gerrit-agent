@@ -201,7 +201,11 @@ def view(
                 if diffs_data:
                     output_data["diffs"] = diffs_data
                 if comments_data:
-                    output_data["comments"] = comments_data
+                    # Convert CommentInfo Pydantic models to dicts for JSON serialization
+                    output_data["comments"] = {
+                        file_path: [comment.model_dump() for comment in comments]
+                        for file_path, comments in comments_data.items()
+                    }
 
                 click.echo(json.dumps(output_data, indent=2, ensure_ascii=False))
             else:

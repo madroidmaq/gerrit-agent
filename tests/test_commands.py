@@ -229,3 +229,50 @@ class TestViewCommandJsonOutput:
         assert data["change"]["messages"][0]["author"]["account_id"] == 1000
         assert data["change"]["labels"]["Code-Review"]["approved"]["account_id"] == 1000
         assert data["change"]["owner"]["account_id"] == 1000
+
+    @respx.mock
+    def test_view_command_json_with_comments(self, runner, gerrit_env, sample_change_api_response):
+        """Test view command JSON output with comments"""
+        change_detail = {
+            **sample_change_api_response,
+            "messages": [],
+            "labels": {},
+        }
+
+        comments_response = {
+            "src/main.py": [
+                {
+                    "id": "comment-1",
+                    "patch_set": 1,
+                    "line": 42,
+                    "message": "This needs improvement",
+                    "updated": "2025-01-01 10:00:00.000000000",
+                    "author": {"_account_id": 1000, "name": "Reviewer"},
+                    "unresolved": True,
+                }
+            ]
+        }
+
+        respx.get("https://gerrit.example.com/a/changes/12345").mock(
+            return_value=Response(200, text=")]}'\n" + json.dumps(change_detail))
+        )
+        respx.get("https://gerrit.example.com/a/changes/12345/revisions/current/files/").mock(
+            return_value=Response(200, text=")]}'\n{}")
+        )
+        respx.get("https://gerrit.example.com/a/changes/12345/comments").mock(
+            return_value=Response(200, text=")]}'\n" + json.dumps(comments_response))
+        )
+
+        result = runner.invoke(cli, ["show", "12345", "--format", "json"], env=gerrit_env)
+
+        assert result.exit_code == 0
+        data = json.loads(result.output)
+
+        # Verify comments are properly serialized
+        assert "comments" in data
+        assert "src/main.py" in data["comments"]
+        assert len(data["comments"]["src/main.py"]) == 1
+        assert data["comments"]["src/main.py"][0]["id"] == "comment-1"
+        assert data["comments"]["src/main.py"][0]["line"] == 42
+        assert data["comments"]["src/main.py"][0]["message"] == "This needs improvement"
+        assert data["comments"]["src/main.py"][0]["unresolved"] is True
