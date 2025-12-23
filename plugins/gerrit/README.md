@@ -6,8 +6,8 @@ Automated code review for Gerrit changes using Claude Code with multi-agent anal
 
 ```bash
 # 1. Install the plugin
-/plugin marketplace add madroidmaq/gerrit-agent-skill
-/plugin install gerrit@gerrit-agent-skills
+/plugin marketplace add madroidmaq/gerrit-agent
+/plugin install gerrit@gerrit-agent
 
 # 2. Configure Gerrit (one-time setup)
 export GERRIT_URL=https://gerrit.example.com
@@ -36,17 +36,17 @@ export GERRIT_TOKEN=your-token
 **Option 1: From Marketplace (Recommended)**
 
 ```bash
-/plugin marketplace add madroidmaq/gerrit-agent-skill
-/plugin install gerrit@gerrit-agent-skills
+/plugin marketplace add madroidmaq/gerrit-agent
+/plugin install gerrit@gerrit-agent
 ```
 
-Or use the UI: `Browse and install plugins` → `gerrit-agent-skills` → `gerrit` → `Install now`
+Or use the UI: `Browse and install plugins` → `gerrit-agent` → `gerrit` → `Install now`
 
 **Option 2: Local Development**
 
 ```bash
-git clone https://github.com/madroidmaq/gerrit-agent-skill.git
-cd gerrit-agent-skill
+git clone https://github.com/madroidmaq/gerrit-agent.git
+cd gerrit-agent
 claude plugins link .
 ```
 

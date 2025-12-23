@@ -1,5 +1,5 @@
 [project]
-name = "gerrit-agent-skill"
+name = "gerrit-agent"
 version = "0.1.0"
 description = "An AI-powered Agent and CLI for Gerrit Code Review"
 readme = "README.md"
@@ -49,9 +49,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/madroidmaq/gerrit-agent-skill"
-Repository = "https://github.com/madroidmaq/gerrit-agent-skill"
-Issues = "https://github.com/madroidmaq/gerrit-agent-skill/issues"
+Homepage = "https://github.com/madroidmaq/gerrit-agent"
+Repository = "https://github.com/madroidmaq/gerrit-agent"
+Issues = "https://github.com/madroidmaq/gerrit-agent/issues"
 
 [project.scripts]
 gerrit = "gerrit_cli.cli:main"

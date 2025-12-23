@@ -1,6 +1,6 @@
 # Gerrit Review Extension
 
-This extension uses `gerrit-agent-skill` and Gemini to perform automated code reviews on Gerrit changes.
+This extension uses `gerrit-agent` and Gemini to perform automated code reviews on Gerrit changes.
 
 ## Features
 - Fetches code changes directly from Gerrit.
@@ -10,7 +10,7 @@ This extension uses `gerrit-agent-skill` and Gemini to perform automated code re
 ## Installation
 Run the following command in the project root:
 ```bash
-gemini extensions link https://github.com/madroidmaq/gerrit-agent-skill/gemini-cli-extensions
+gemini extensions link https://github.com/madroidmaq/gerrit-agent/gemini-cli-extensions
 ```
 
 ## Usage

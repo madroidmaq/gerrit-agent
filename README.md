@@ -4,7 +4,7 @@
 
 **AI-Powered Code Review Assistant for Gerrit**
 
-[![PyPI version](https://badge.fury.io/py/gerrit-agent-skill.svg)](https://badge.fury.io/py/gerrit-agent-skill)
+[![PyPI version](https://badge.fury.io/py/gerrit-agent.svg)](https://badge.fury.io/py/gerrit-agent)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
@@ -37,10 +37,10 @@ Get started with the **Claude Code Plugin** (recommended):
 
 ```bash
 # 1. Register the plugin marketplace
-/plugin marketplace add madroidmaq/gerrit-agent-skill
+/plugin marketplace add madroidmaq/gerrit-agent
 
 # 2. Install the plugin
-/plugin install gerrit@gerrit-agent-skills
+/plugin install gerrit@gerrit-agent
 
 # 3. Configure Gerrit credentials (copy .env.example and edit)
 export GERRIT_URL=https://gerrit.example.com
@@ -65,8 +65,8 @@ AI-powered code reviews with multi-agent analysis and confidence scoring.
 
 See [Quick Start](#-quick-start) above, or use the UI:
 
-1. Run `/plugin marketplace add madroidmaq/gerrit-agent-skill`
-2. Select `Browse and install plugins` → `gerrit-agent-skills` → `gerrit` → `Install now`
+1. Run `/plugin marketplace add madroidmaq/gerrit-agent`
+2. Select `Browse and install plugins` → `gerrit-agent` → `gerrit` → `Install now`
 
 **Usage:**
 
@@ -86,7 +86,7 @@ GitHub CLI-like interface for Gerrit operations (list, view, checkout, review).
 
 **Quick Start:**
 ```bash
-pip install gerrit-agent-skill
+pip install gerrit-agent
 export GERRIT_URL=https://gerrit.example.com GERRIT_USERNAME=user GERRIT_TOKEN=token
 gerrit list --owner me --status open
 ```
@@ -108,7 +108,7 @@ Natural language code reviews with "Principal Software Engineer" persona.
 
 ```bash
 # Install
-gemini extensions link https://github.com/madroidmaq/gerrit-agent-skill/gemini-cli-extensions
+gemini extensions link https://github.com/madroidmaq/gerrit-agent/gemini-cli-extensions
 
 # Use natural language
 gemini "Review change 12345"
@@ -128,10 +128,10 @@ gemini "Review change 12345"
 
 ## 🤝 Contributing
 
-Contributions welcome! See [Issues](https://github.com/madroidmaq/gerrit-agent-skill/issues) for planned features.
+Contributions welcome! See [Issues](https://github.com/madroidmaq/gerrit-agent/issues) for planned features.
 
 ```bash
-git clone https://github.com/madroidmaq/gerrit-agent-skill.git && cd gerrit-agent-skill
+git clone https://github.com/madroidmaq/gerrit-agent.git && cd gerrit-agent
 uv sync --extra dev && uv run pytest
 ```
 
@@ -150,6 +150,6 @@ Built with [Click](https://click.palletsprojects.com/), [Rich](https://rich.read
 
 **If you find this helpful, please ⭐ star the repo!**
 
-[Report Bug](https://github.com/madroidmaq/gerrit-agent-skill/issues) • [Request Feature](https://github.com/madroidmaq/gerrit-agent-skill/issues)
+[Report Bug](https://github.com/madroidmaq/gerrit-agent/issues) • [Request Feature](https://github.com/madroidmaq/gerrit-agent/issues)
 
 </div>
