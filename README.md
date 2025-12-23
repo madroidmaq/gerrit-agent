@@ -18,72 +18,87 @@ Transform your Gerrit code reviews with AI-powered analysis using **Claude Code*
 
 ## 📖 Overview
 
-**Gerrit Agent** is an AI-powered code review platform that integrates cutting-edge Code Agents (Claude Code, Gemini CLI, etc.) with Gerrit Code Review. It provides automated code analysis, intelligent inline comments, and multi-agent review workflows - all directly from your terminal.
+**Gerrit Agent** transforms Gerrit code reviews with AI-powered analysis. Get automated, intelligent code reviews through Claude Code Plugin, standalone CLI, or Gemini integration - with multi-agent analysis, confidence scoring, and inline comment posting.
 
-### Why Gerrit Agent?
+**Key Features:**
 
-- 🧠 **Multiple AI Agents**: Use Claude, Gemini, or any Claude Agent Skill Protocol-compatible agent
-- 🎯 **Smart Reviews**: Multi-agent analysis with confidence scoring (only shows high-confidence findings ≥80%)
-- 💬 **Inline Comments**: Automatically posts structured feedback directly to Gerrit changes
-- ⚡ **Fast CLI**: Modern, GitHub CLI-like interface for Gerrit operations
-- 🔌 **Extensible**: Built on open protocols, works with any compatible Code Agent
-
----
-
-## ✨ Features
-
-**🤖 AI Agent Integrations:**
-- Claude Code Skill (multi-agent review, confidence scoring)
-- Gemini CLI Extension (natural language reviews)
-- Compatible with Claude Agent Skill Protocol
-
-**💻 CLI Operations:**
-List, view, checkout, review changes • Inline comments • JSON/Table output
-
-**🛡️ Developer-Friendly:**
-HTTP token auth • Rich terminal UI • `.env` config • Comprehensive tests
+- 🤖 **Multi-Agent Reviews** - 3 specialized analyzers (CLAUDE.md compliance, git patterns, documentation)
+- 🎯 **Smart Filtering** - Confidence scoring shows only high-quality findings (≥80%)
+- 💬 **Direct Integration** - Posts inline comments to Gerrit with your approval
+- ⚡ **Modern CLI** - GitHub CLI-like interface for all Gerrit operations
+- 🔌 **Multiple Modes** - Claude Code Plugin, standalone CLI, or Gemini extension
 
 ---
 
 
 ## 🚀 Quick Start
 
-**Install:**
-```bash
-pip install gerrit-agent-skill
-```
+Get started with the **Claude Code Plugin** (recommended):
 
-**Configure:**
 ```bash
+# 1. Register the plugin marketplace
+/plugin marketplace add madroidmaq/gerrit-agent-skill
+
+# 2. Install the plugin
+/plugin install gerrit@gerrit-agent-skills
+
+# 3. Configure Gerrit credentials (copy .env.example and edit)
 export GERRIT_URL=https://gerrit.example.com
 export GERRIT_USERNAME=your_username
 export GERRIT_TOKEN=your_http_token
+
+# 4. Review a change
+/review 12345
 ```
 
-**Verify:**
-```bash
-gerrit --help
-```
+> 💡 See [.env.example](.env.example) for configuration options or [CLI Quick Start](#-standalone-cli) for standalone usage
 
 ---
 
 ## 🎯 Usage Modes
 
-### 🤖 Claude Code Skill
+### 🤖 Claude Code Plugin
 
-Multi-agent code review with confidence scoring.
+AI-powered code reviews with multi-agent analysis and confidence scoring.
 
+**Installation:**
+
+See [Quick Start](#-quick-start) above, or use the UI:
+
+1. Run `/plugin marketplace add madroidmaq/gerrit-agent-skill`
+2. Select `Browse and install plugins` → `gerrit-agent-skills` → `gerrit` → `Install now`
+
+**Usage:**
+
+| Method | Command | Description |
+|--------|---------|-------------|
+| **Command** | `/review 12345` | Direct review command (recommended) |
+| **With namespace** | `/gerrit:review 12345` | Full command path |
+| **Natural language** | `"Review Gerrit change 12345"` | Triggers gerrit-reviewer skill |
+
+📚 [Full plugin documentation →](plugins/gerrit/README.md)
+
+---
+
+### 💻 Standalone CLI
+
+GitHub CLI-like interface for Gerrit operations (list, view, checkout, review).
+
+**Quick Start:**
 ```bash
-# Install skill
-claude --skill-dir /path/to/gerrit-agent-skill/skills/gerrit
-
-# Use it
-/gerrit:review 12345
+pip install gerrit-agent-skill
+export GERRIT_URL=https://gerrit.example.com GERRIT_USERNAME=user GERRIT_TOKEN=token
+gerrit list --owner me --status open
 ```
 
-Features: 3 specialized analyzers, confidence scoring (≥80%), user confirmation before posting.
+**Common Commands:**
+```bash
+gerrit show 12345 --diff           # View change with diff
+gerrit checkout 12345               # Checkout change locally
+gerrit review 12345 --code-review +2 -m "LGTM!"  # Post review
+```
 
-📚 [Full documentation →](skills/gerrit/README.md)
+📚 [Full CLI reference →](docs/CLI_REFERENCE.md)
 
 ---
 
@@ -95,39 +110,18 @@ Natural language code reviews with "Principal Software Engineer" persona.
 # Install
 gemini extensions link https://github.com/madroidmaq/gerrit-agent-skill/gemini-cli-extensions
 
-# Use it
+# Use natural language
 gemini "Review change 12345"
-gemini /gerrit:review 12345
 ```
 
 📚 [Full documentation →](gemini-cli-extensions/README.md)
 
 ---
 
-### 💻 Standalone CLI
-
-GitHub CLI-like experience for Gerrit operations.
-
-```bash
-# List changes
-gerrit list --owner me --status open
-
-# View change
-gerrit show 12345 --diff
-
-# Checkout and review
-gerrit checkout 12345
-gerrit review 12345 --code-review +2 -m "LGTM!"
-```
-
-📚 [Full CLI reference →](docs/CLI_REFERENCE.md)
-
----
-
 ## 📚 Documentation
 
 - [CLI Reference](docs/CLI_REFERENCE.md)
-- [Claude Skill Setup](skills/gerrit/README.md)
+- [Claude Code Plugin](plugins/gerrit/README.md)
 - [Gemini Extension](gemini-cli-extensions/README.md)
 
 ---

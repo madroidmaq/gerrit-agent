@@ -13,8 +13,9 @@
       "name": "gerrit",
       "description": "Automated code review for Gerrit changes with multi-agent analysis, confidence scoring, and inline comment posting",
       "source": "./plugins/gerrit",
-      "strict": false,
-      "skills": ["./plugins/gerrit/skills/gerrit-reviewer"]
+      "strict": true,
+      "skills": ["./plugins/gerrit/skills/gerrit-reviewer"],
+      "commands": ["./plugins/gerrit/commands/review.md"]
     }
   ]
 }
