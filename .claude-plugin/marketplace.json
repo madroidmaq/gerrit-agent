@@ -10,11 +10,11 @@
   },
   "plugins": [
     {
-      "name": "gerrit-agent-skills",
+      "name": "gerrit",
       "description": "Automated code review for Gerrit changes with multi-agent analysis, confidence scoring, and inline comment posting",
-      "source": "./",
+      "source": "./plugins/gerrit",
       "strict": false,
-      "skills": ["./skills/gerrit"]
+      "skills": ["./plugins/gerrit/skills/gerrit-reviewer"]
     }
   ]
 }
